@@ -18,9 +18,19 @@ class ProviderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->provider->paginate(10);
+        $name = $request->name;
+        $contact = $request->contact;
+        $rfc = $request->rfc;
+
+        return $this->provider->with('files')->when($name, function ($query) use ($name) {
+            return $query->where('name',  'like', '%' . $name . '%');
+        })->when($contact, function ($query) use ($contact) {
+            return $query->where('contact',  'like', '%' . $contact . '%');
+        })->when($rfc, function ($query) use ($rfc) {
+            return $query->where('rfc', 'like', '%' . $rfc . '%');
+        })->paginate(10);
     }
 
     /**

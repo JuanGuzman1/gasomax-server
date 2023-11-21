@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Administration\ProviderController;
+use App\Http\Controllers\FileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,3 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::apiResource('/provider', ProviderController::class);
+Route::apiResource('/file', FileController::class);
+Route::get('/download/{file}', [FileController::class, 'download']);

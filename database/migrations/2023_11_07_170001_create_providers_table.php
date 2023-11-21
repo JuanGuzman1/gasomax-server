@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('phone', 15)->nullable();
             $table->string('email')->nullable();
             $table->string('accountingAccount')->nullable();
-            $table->string('csf_file_id')->nullable();
             $table->timestamps();
         });
     }
