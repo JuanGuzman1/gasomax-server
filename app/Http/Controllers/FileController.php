@@ -73,7 +73,22 @@ class FileController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $file = $this->file->find($id);
+        $filesystem = Storage::disk('dropbox');
+        $filesystem->delete($file->path);
+
+        return $file->delete();
+    }
+
+    /**
+     * find to remove by fileable_id resource from storage.
+     */
+    public function destroyByModel(string $id, string $model)
+    {
+        $files = $this->file->select('id')->where('fileable_id', $id)->where('fileable_type', $model)->get();
+        foreach ($files as $f) {
+            $this->destroy($f->id);
+        }
     }
 
 

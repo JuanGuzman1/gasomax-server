@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Administration\BankController;
 use App\Http\Controllers\Administration\ProviderController;
 use App\Http\Controllers\FileController;
 use Illuminate\Http\Request;
@@ -20,6 +21,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+//banks
+Route::apiResource('bank', BankController::class);
+
+//providers
 Route::apiResource('/provider', ProviderController::class);
+Route::get('/excel/provider/export', [ProviderController::class, 'export']);
+
+//files
 Route::apiResource('/file', FileController::class);
 Route::get('/download/{file}', [FileController::class, 'download']);
+Route::delete('/{model_id}/{model_type}/destroy/files', [FileController::class, 'destroyByModel']);

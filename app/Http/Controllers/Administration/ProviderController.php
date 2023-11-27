@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Administration;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Administration\Provider;
+use App\Exports\ProvidersExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProviderController extends Controller
 {
@@ -65,6 +67,22 @@ class ProviderController extends Controller
     public function destroy(string $id)
     {
         $provider = $this->provider->find($id);
+
         return $provider->delete();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function export(Request $request)
+    {
+        $filters = [
+            'name' => $request->name,
+            'contact' => $request->contact,
+            'rfc' => $request->rfc
+        ];
+
+
+        return Excel::download(new ProvidersExport($filters), 'Proveedores.xlsx');
     }
 }
