@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 //banks
 Route::apiResource('bank', BankController::class);
+Route::get('/select/bank', [BankController::class, 'select']);
 
 //providers
 Route::apiResource('/provider', ProviderController::class);

@@ -24,7 +24,7 @@ class BankController extends Controller
 
         return $this->bank->when($name, function ($query) use ($name) {
             return $query->where('name',  'like', '%' . $name . '%');
-        })->paginate(10);
+        })->orderBy('created_at', 'desc')->paginate(10);
     }
 
     /**
@@ -60,5 +60,13 @@ class BankController extends Controller
     {
         $bank = $this->bank->find($id);
         return $bank->delete();
+    }
+
+    /**
+     * Display all of the resource for select.
+     */
+    public function select()
+    {
+        return $this->bank->orderBy('created_at', 'desc')->get();
     }
 }

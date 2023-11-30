@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Administration\Provider;
 use App\Exports\ProvidersExport;
+use App\Models\Administration\Bank;
+use App\Models\Administration\ProviderAccount;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProviderController extends Controller
@@ -26,13 +28,13 @@ class ProviderController extends Controller
         $contact = $request->contact;
         $rfc = $request->rfc;
 
-        return $this->provider->with('files')->when($name, function ($query) use ($name) {
+        return $this->provider->with(['files', 'accounts'])->when($name, function ($query) use ($name) {
             return $query->where('name',  'like', '%' . $name . '%');
         })->when($contact, function ($query) use ($contact) {
             return $query->where('contact',  'like', '%' . $contact . '%');
         })->when($rfc, function ($query) use ($rfc) {
             return $query->where('rfc', 'like', '%' . $rfc . '%');
-        })->paginate(10);
+        })->orderBy('created_at', 'desc')->paginate(10);
     }
 
     /**
@@ -40,7 +42,21 @@ class ProviderController extends Controller
      */
     public function store(Request $request)
     {
-        return $this->provider->create($request->all());
+        $provider = $this->provider->create($request->all());
+        if ($request->bankAccounts) {
+            foreach ($request->bankAccounts as $BA) {
+                $providerAccount = new ProviderAccount([
+                    'bankAccount' => $BA['bankAccount'],
+                    'clabe' => $BA['clabe'],
+                ]);
+                $bank = Bank::find($BA['bank_id']);
+                $providerAccount->bank()->associate($bank);
+                $provider->accounts()->save($providerAccount);
+            }
+        }
+
+
+        return $provider;
     }
 
     /**
@@ -56,8 +72,20 @@ class ProviderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $provider = $this->provider->find($id);
+        $provider = $this->provider->with('files')->where('id', $id)->firstOrFail();
         $provider->update($request->all());
+        if ($request->bankAccounts) {
+            $provider->accounts()->delete();
+            foreach ($request->bankAccounts as $BA) {
+                $providerAccount = new ProviderAccount([
+                    'bankAccount' => $BA['bankAccount'],
+                    'clabe' => $BA['clabe'],
+                ]);
+                $bank = Bank::find($BA['bank_id']);
+                $providerAccount->bank()->associate($bank);
+                $provider->accounts()->save($providerAccount);
+            }
+        }
         return $provider;
     }
 

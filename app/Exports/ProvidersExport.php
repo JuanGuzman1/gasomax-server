@@ -30,7 +30,7 @@ class ProvidersExport implements FromCollection, WithHeadings
                 return $query->where('contact',  'like', '%' . $contact . '%');
             })->when($rfc, function ($query) use ($rfc) {
                 return $query->where('rfc', 'like', '%' . $rfc . '%');
-            })->get();
+            })->orderBy('created_at', 'desc')->get();
     }
 
     /**
