@@ -48,6 +48,7 @@ class ProviderController extends Controller
                 $providerAccount = new ProviderAccount([
                     'bankAccount' => $BA['bankAccount'],
                     'clabe' => $BA['clabe'],
+                    'primary' => $BA['primary'] ?? false,
                 ]);
                 $bank = Bank::find($BA['bank_id']);
                 $providerAccount->bank()->associate($bank);
@@ -80,6 +81,7 @@ class ProviderController extends Controller
                 $providerAccount = new ProviderAccount([
                     'bankAccount' => $BA['bankAccount'],
                     'clabe' => $BA['clabe'],
+                    'primary' => $BA['primary'] ?? false,
                 ]);
                 $bank = Bank::find($BA['bank_id']);
                 $providerAccount->bank()->associate($bank);

@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Administration;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Administration\Bank;
+use App\Traits\ApiResponseTrait;
 
 class BankController extends Controller
 {
+    use ApiResponseTrait;
 
     protected $bank;
     public function __construct()
@@ -32,7 +34,12 @@ class BankController extends Controller
      */
     public function store(Request $request)
     {
-        return $this->bank->create($request->all());
+        try {
+            $data = $this->bank->create($request->all());
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
@@ -40,7 +47,8 @@ class BankController extends Controller
      */
     public function show(string $id)
     {
-        return $this->bank->find($id);
+        $data = $this->bank->find($id);
+        return $this->successResponse($data);
     }
 
     /**
@@ -48,9 +56,13 @@ class BankController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $bank = $this->bank->find($id);
-        $bank->update($request->all());
-        return $bank;
+        try {
+            $bank = $this->bank->find($id);
+            $bank->update($request->all());
+            return $this->successResponse($bank);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
@@ -58,8 +70,13 @@ class BankController extends Controller
      */
     public function destroy(string $id)
     {
-        $bank = $this->bank->find($id);
-        return $bank->delete();
+        try {
+            $bank = $this->bank->find($id);
+            $data = $bank->delete();
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
