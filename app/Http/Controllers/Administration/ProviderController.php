@@ -8,10 +8,12 @@ use App\Models\Administration\Provider;
 use App\Exports\ProvidersExport;
 use App\Models\Administration\Bank;
 use App\Models\Administration\ProviderAccount;
+use App\Traits\ApiResponseTrait;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProviderController extends Controller
 {
+    use ApiResponseTrait;
 
     protected $provider;
     public function __construct()
@@ -42,22 +44,25 @@ class ProviderController extends Controller
      */
     public function store(Request $request)
     {
-        $provider = $this->provider->create($request->all());
-        if ($request->bankAccounts) {
-            foreach ($request->bankAccounts as $BA) {
-                $providerAccount = new ProviderAccount([
-                    'bankAccount' => $BA['bankAccount'],
-                    'clabe' => $BA['clabe'],
-                    'primary' => $BA['primary'] ?? false,
-                ]);
-                $bank = Bank::find($BA['bank_id']);
-                $providerAccount->bank()->associate($bank);
-                $provider->accounts()->save($providerAccount);
+        try {
+            $provider = $this->provider->create($request->all());
+            if ($request->bankAccounts) {
+                foreach ($request->bankAccounts as $BA) {
+                    $providerAccount = new ProviderAccount([
+                        'bankAccount' => $BA['bankAccount'],
+                        'clabe' => $BA['clabe'],
+                        'primary' => $BA['primary'] ?? false,
+                    ]);
+                    $bank = Bank::find($BA['bank_id']);
+                    $providerAccount->bank()->associate($bank);
+                    $provider->accounts()->save($providerAccount);
+                }
             }
+            $providerRes = $this->provider->with(['files', 'accounts'])->where('id', $provider->id)->firstOrFail();
+            return $this->successResponse($providerRes);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
-
-
-        return $provider;
     }
 
     /**
@@ -65,7 +70,8 @@ class ProviderController extends Controller
      */
     public function show(string $id)
     {
-        return $this->provider->find($id);
+        $data = $this->provider->find($id);
+        return $this->successResponse($data);
     }
 
     /**
@@ -73,22 +79,27 @@ class ProviderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $provider = $this->provider->with('files')->where('id', $id)->firstOrFail();
-        $provider->update($request->all());
-        if ($request->bankAccounts) {
-            $provider->accounts()->delete();
-            foreach ($request->bankAccounts as $BA) {
-                $providerAccount = new ProviderAccount([
-                    'bankAccount' => $BA['bankAccount'],
-                    'clabe' => $BA['clabe'],
-                    'primary' => $BA['primary'] ?? false,
-                ]);
-                $bank = Bank::find($BA['bank_id']);
-                $providerAccount->bank()->associate($bank);
-                $provider->accounts()->save($providerAccount);
+        try {
+            $provider = $this->provider->find($id);
+            $provider->update($request->all());
+            if ($request->bankAccounts) {
+                $provider->accounts()->delete();
+                foreach ($request->bankAccounts as $BA) {
+                    $providerAccount = new ProviderAccount([
+                        'bankAccount' => $BA['bankAccount'],
+                        'clabe' => $BA['clabe'],
+                        'primary' => $BA['primary'] ?? false,
+                    ]);
+                    $bank = Bank::find($BA['bank_id']);
+                    $providerAccount->bank()->associate($bank);
+                    $provider->accounts()->save($providerAccount);
+                }
             }
+            $providerRes = $this->provider->with(['files', 'accounts'])->where('id', $id)->firstOrFail();
+            return $this->successResponse($providerRes);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
-        return $provider;
     }
 
     /**
@@ -96,9 +107,13 @@ class ProviderController extends Controller
      */
     public function destroy(string $id)
     {
-        $provider = $this->provider->find($id);
-
-        return $provider->delete();
+        try {
+            $provider = $this->provider->find($id);
+            $data = $provider->delete();
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
