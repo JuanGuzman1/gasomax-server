@@ -130,4 +130,12 @@ class ProviderController extends Controller
 
         return Excel::download(new ProvidersExport($filters), 'Proveedores.xlsx');
     }
+
+    /**
+     * Display all of the resource for select.
+     */
+    public function select()
+    {
+        return $this->provider->orderBy('created_at', 'desc')->get();
+    }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Administration\BankController;
 use App\Http\Controllers\Administration\ProviderController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\Payments\PurchaseRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,8 +29,12 @@ Route::get('/select/bank', [BankController::class, 'select']);
 //providers
 Route::apiResource('/provider', ProviderController::class);
 Route::get('/excel/provider/export', [ProviderController::class, 'export']);
+Route::get('/select/provider', [ProviderController::class, 'select']);
 
 //files
 Route::apiResource('/file', FileController::class);
 Route::get('/download/{file}', [FileController::class, 'download']);
 Route::delete('/{model_id}/{model_type}/destroy/files', [FileController::class, 'destroyByModel']);
+
+//purchaseRequest
+Route::apiResource('/purchaseRequest', PurchaseRequestController::class);
