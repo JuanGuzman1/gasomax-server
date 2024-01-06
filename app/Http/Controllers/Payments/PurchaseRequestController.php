@@ -7,7 +7,7 @@ use App\Models\Payments\PurchaseRequest;
 use App\Models\Payments\PurchaseRequestDetail;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
-use Exception;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PurchaseRequestController extends Controller
 {
@@ -73,7 +73,31 @@ class PurchaseRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $purchaseRequest = $this->purchaseRequest->find($id);
+            $purchaseRequest->update($request->all());
+            if ($request->details) {
+                $purchaseRequest->details()->delete();
+                foreach ($request->details as $d) {
+                    $detail = new PurchaseRequestDetail([
+                        'charge' => $d['charge'],
+                        'concept' => $d['concept'],
+                        'movementType' => $d['movementType'],
+                        'observation' => $d['observation'],
+                        'totalAmount' => $d['totalAmount'],
+                        'paymentAmount' => $d['paymentAmount'],
+                        'balance' => $d['totalAmount'] - $d['paymentAmount'],
+                    ]);
+
+                    $purchaseRequest->details()->save($detail);
+                }
+            }
+            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+                ->where('id', $id)->firstOrFail();
+            return $this->successResponse($purchaseRequestRes);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
@@ -88,5 +112,26 @@ class PurchaseRequestController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
+    }
+
+    /**
+     * Get PDF export.
+     */
+    public function exportPDF(string $id)
+    {
+        $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+            ->where('id', $id)->firstOrFail();
+
+        $purchaseRequestRes->import = collect($purchaseRequestRes->details)->reduce(function ($a, $d) {
+            return $a + $d->paymentAmount;
+        }, 0);
+
+        if ($purchaseRequestRes->paymentMethod === 'transference') {
+            $account = $purchaseRequestRes->provider->accounts->firstWhere('primary', 1);
+            $purchaseRequestRes->account = $account;
+        }
+
+        $pdf = PDF::loadView('pdf/purchaseRequest', ['purchaseRequest' => $purchaseRequestRes]);
+        return $pdf->stream();
     }
 }

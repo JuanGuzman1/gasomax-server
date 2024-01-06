@@ -4,6 +4,7 @@ use App\Http\Controllers\Administration\BankController;
 use App\Http\Controllers\Administration\ProviderController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\Payments\PurchaseRequestController;
+use App\Http\Controllers\Payments\PurchaseRequestObservationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,3 +39,5 @@ Route::delete('/{model_id}/{model_type}/destroy/files', [FileController::class, 
 
 //purchaseRequest
 Route::apiResource('/purchaseRequest', PurchaseRequestController::class);
+Route::apiResource('/purchaseRequestObservation', PurchaseRequestObservationController::class);
+Route::get('/pdf/purchaseRequest/export/{purchaseRequest}', [PurchaseRequestController::class, 'exportPDF']);

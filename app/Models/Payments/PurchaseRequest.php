@@ -45,4 +45,12 @@ class PurchaseRequest extends Model
     {
         return $this->hasMany(PurchaseRequestDetail::class);
     }
+
+    /**
+     * Get the observations of the purchaseRequest.
+     */
+    public function observations(): HasMany
+    {
+        return $this->hasMany(PurchaseRequestObservation::class);
+    }
 }

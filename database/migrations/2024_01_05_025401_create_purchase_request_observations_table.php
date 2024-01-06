@@ -11,19 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('purchase_request_details', function (Blueprint $table) {
+        Schema::create('purchase_request_observations', function (Blueprint $table) {
             $table->id();
+            $table->unsignedInteger('user_id');
             $table->unsignedInteger('purchase_request_id');
-            $table->string('charge');
-            $table->string('concept');
-            $table->enum('movementType', ['advance', 'settlement', 'payment']);
-            $table->text('observation');
-            $table->float('totalAmount');
-            $table->float('paymentAmount');
-            $table->float('balance');
-            $table->unsignedInteger('purchase_detail_pending_id')->nullable();
+            $table->text('message');
             $table->timestamps();
 
+            $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('purchase_request_id')->references('id')->on('purchase_requests')->onDelete('cascade');
         });
     }
@@ -33,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('purchase_request_details');
+        Schema::dropIfExists('purchase_request_observations');
     }
 };
