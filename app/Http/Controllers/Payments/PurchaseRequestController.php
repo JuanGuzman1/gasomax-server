@@ -23,9 +23,24 @@ class PurchaseRequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $provider = $request->provider;
+        $petitioner = $request->petitioner;
+        $status = $request->status;
+
         return $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+            ->when($provider, function ($query) use ($provider) {
+                return $query->whereHas('provider', function ($q) use ($provider) {
+                    $q->where('name',  'like', '%' . $provider . '%');
+                });
+            })->when($petitioner, function ($query) use ($petitioner) {
+                return $query->whereHas('petitioner', function ($q) use ($petitioner) {
+                    $q->where('name',  'like', '%' . $petitioner . '%');
+                });
+            })->when($status, function ($query) use ($status) {
+                return $query->where('status', $status);
+            })
             ->orderBy('created_at', 'desc')->paginate(10);
     }
 
@@ -133,5 +148,29 @@ class PurchaseRequestController extends Controller
 
         $pdf = PDF::loadView('pdf/purchaseRequest', ['purchaseRequest' => $purchaseRequestRes]);
         return $pdf->stream();
+    }
+
+    /**
+     * Display the pending payment details by provider.
+     */
+    public function showPendingPaymentDetails(Request $request)
+    {
+        $providerID = $request->provider_id;
+        $data = $this->purchaseRequest->with(['details'])
+            ->when($providerID, function ($query) use ($providerID) {
+                return $query->where('provider_id', $providerID);
+            })->get();
+
+        $details = [];
+        foreach ($data as $d) {
+            foreach ($d->details as $det) {
+                if ($det->balance > 0) {
+                    array_push($details, $det);
+                }
+            }
+        }
+
+
+        return $details;
     }
 }

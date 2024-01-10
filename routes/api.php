@@ -41,3 +41,4 @@ Route::delete('/{model_id}/{model_type}/destroy/files', [FileController::class, 
 Route::apiResource('/purchaseRequest', PurchaseRequestController::class);
 Route::apiResource('/purchaseRequestObservation', PurchaseRequestObservationController::class);
 Route::get('/pdf/purchaseRequest/export/{purchaseRequest}', [PurchaseRequestController::class, 'exportPDF']);
+Route::get('/pending/details/purchaseRequest', [PurchaseRequestController::class, 'showPendingPaymentDetails']);
