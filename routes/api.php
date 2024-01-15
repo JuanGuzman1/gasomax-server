@@ -42,3 +42,6 @@ Route::apiResource('/purchaseRequest', PurchaseRequestController::class);
 Route::apiResource('/purchaseRequestObservation', PurchaseRequestObservationController::class);
 Route::get('/pdf/purchaseRequest/export/{purchaseRequest}', [PurchaseRequestController::class, 'exportPDF']);
 Route::get('/pending/details/purchaseRequest', [PurchaseRequestController::class, 'showPendingPaymentDetails']);
+Route::put('/reject/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'reject']);
+Route::put('/approve/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'approve']);
+Route::get('/pending/purchaseRequest', [PurchaseRequestController::class, 'getPendingPayments']);

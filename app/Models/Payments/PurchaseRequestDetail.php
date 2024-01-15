@@ -16,5 +16,6 @@ class PurchaseRequestDetail extends Model
         'totalAmount',
         'paymentAmount',
         'balance',
+        'purchase_detail_pending_id'
     ];
 }

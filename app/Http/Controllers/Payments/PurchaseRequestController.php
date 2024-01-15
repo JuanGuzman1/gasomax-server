@@ -8,6 +8,8 @@ use App\Models\Payments\PurchaseRequestDetail;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Helpers\Helpers;
+use App\Models\Payments\PurchaseRequestObservation;
 
 class PurchaseRequestController extends Controller
 {
@@ -15,6 +17,7 @@ class PurchaseRequestController extends Controller
     use ApiResponseTrait;
 
     protected $purchaseRequest;
+
     public function __construct()
     {
         $this->purchaseRequest = new PurchaseRequest();
@@ -61,7 +64,14 @@ class PurchaseRequestController extends Controller
                         'totalAmount' => $d['totalAmount'],
                         'paymentAmount' => $d['paymentAmount'],
                         'balance' => $d['totalAmount'] - $d['paymentAmount'],
+                        'purchase_detail_pending_id' => $d['purchase_detail_pending_id']
                     ]);
+
+                    if ($d['purchase_detail_pending_id']) {
+                        $detailPending = PurchaseRequestDetail::find($d['purchase_detail_pending_id']);
+                        $detailPending->balance = 0;
+                        $detailPending->save();
+                    }
 
                     $purchaseRequest->details()->save($detail);
                 }
@@ -134,6 +144,7 @@ class PurchaseRequestController extends Controller
      */
     public function exportPDF(string $id)
     {
+        $functions = new Helpers();
         $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
             ->where('id', $id)->firstOrFail();
 
@@ -146,7 +157,10 @@ class PurchaseRequestController extends Controller
             $purchaseRequestRes->account = $account;
         }
 
-        $pdf = PDF::loadView('pdf/purchaseRequest', ['purchaseRequest' => $purchaseRequestRes]);
+        $pdf = PDF::loadView('pdf/purchaseRequest', [
+            'purchaseRequest' => $purchaseRequestRes,
+            'Helpers' => $functions
+        ]);
         return $pdf->stream();
     }
 
@@ -172,5 +186,108 @@ class PurchaseRequestController extends Controller
 
 
         return $details;
+    }
+
+    /**
+     * Reject the specified request in storage.
+     */
+    public function reject(Request $request, string $id)
+    {
+        try {
+            $purchaseRequest = $this->purchaseRequest->find($id);
+            $purchaseRequest->update([
+                'status' => 'rejected'
+            ]);
+            if ($request->observation) {
+
+                $observation = new PurchaseRequestObservation([
+                    'message' => 'Motivo rechazo: ' . $request->observation,
+                    'user_id' => $request->user_id
+                ]);
+
+                $purchaseRequest->observations()->save($observation);
+            }
+            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+                ->where('id', $id)->firstOrFail();
+            return $this->successResponse($purchaseRequestRes);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * approve the specified request in storage.
+     */
+    public function approve(Request $request, string $id)
+    {
+        try {
+            $purchaseRequest = $this->purchaseRequest->find($id);
+            $purchaseRequest->update([
+                'status' => 'approved'
+            ]);
+            $observation = new PurchaseRequestObservation([
+                'message' => 'Cotización aprobada',
+                'user_id' => $request->user_id
+            ]);
+            $purchaseRequest->observations()->save($observation);
+
+            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+                ->where('id', $id)->firstOrFail();
+            return $this->successResponse($purchaseRequestRes);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+
+    /**
+     * Display the pending payment details.
+     */
+    public function getPendingPayments(Request $request)
+    {
+        $userID = $request->user_id;
+        $provider = $request->provider;
+        $petitioner = $request->petitioner;
+
+
+        $data = $this->purchaseRequest->with(['details', 'petitioner', 'provider'])
+            ->when($userID, function ($query) use ($userID) {
+                return $query->where('petitioner_id', $userID);
+            })->when($provider, function ($query) use ($provider) {
+                return $query->whereHas('provider', function ($q) use ($provider) {
+                    $q->where('name',  'like', '%' . $provider . '%');
+                });
+            })->when($petitioner, function ($query) use ($petitioner) {
+                return $query->whereHas('petitioner', function ($q) use ($petitioner) {
+                    $q->where('name',  'like', '%' . $petitioner . '%');
+                });
+            })
+            ->whereHas('details', function ($query) {
+                $query->where('balance', '>', 0);
+            })->paginate(10);
+
+
+        foreach ($data as $d) {
+            $filtered = $d->details->filter(function ($item) {
+                if ($item->balance > 0) {
+                    return $item;
+                }
+            })->values();
+            $d->detailsFiltered = $filtered;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Display the pending payment details.
+     */
+    public function getBalancePayments(string $id)
+    {
+
+        $pendingDetail = PurchaseRequestDetail::findOrFail($id);
+
+
+        // $details = PurchaseRequestDetail::whereHas('pr');
     }
 }

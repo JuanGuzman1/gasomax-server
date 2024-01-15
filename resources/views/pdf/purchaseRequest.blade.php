@@ -198,7 +198,7 @@
                 </div>
                 <div colspan="3" class="table-cell1">
                     <p class="estatus">
-                        {{$purchaseRequest->status}}
+                        {{$Helpers->statusPurchaseRequest($purchaseRequest->status)}}
                     </p>
                 </div>
             </div>
@@ -232,7 +232,7 @@
                 </div>
                 <div colspan="1" class="table-cell1 title-cabecera">
                     <div class="info-cabecera">
-                        <p>{{$purchaseRequest->business}}</p>
+                        <p>{{$Helpers->business($purchaseRequest->business)}}</p>
                     </div>
                 </div>
                 <div colspan="2" class="table-cell1 title-cabecera">
@@ -267,7 +267,8 @@
                 </div>
                 <div colspan="1" class="table-cell1 title-cabecera">
                     <div class="info-cabecera" style="background-color: #fff; border: 1pt solid #21274E;">
-                        <p style="font-size: 11.5pt; margin-top:-1px;">$ {{number_format((float)$purchaseRequest->import, 2, '.', ',')}}</p>
+                        <p style="font-size: 11.5pt; margin-top:-1px;">
+                            $ {{number_format((float)$purchaseRequest->import, 2, '.', ',')}}</p>
                     </div>
                 </div>
                 <div colspan="1" class="table-cell1 title-cabecera">
@@ -275,9 +276,7 @@
             </div>
             <div class="table-row">
                 <div colspan="2" class="table-cell1 title-cabecera">
-                    @if($purchaseRequest->paymentMethod === 'transference')
                     <p>Cuenta Destino</p>
-                    @endif
                 </div>
                 <div colspan="1" class="table-cell1 title-cabecera"></div>
                 <div colspan="1" class="table-cell1 title-cabecera"></div>
@@ -288,6 +287,10 @@
                     <div class="info-cabecera">
                         <p>{{$purchaseRequest->account->bank->name}} - {{$purchaseRequest->account->bankAccount}}</p>
                     </div>
+                    @else
+                    <div class="info-cabecera">
+                        <p>N/A</p>
+                    </div>
                     @endif
                 </div>
                 <div colspan="1" class="table-cell1 title-cabecera">
@@ -297,9 +300,7 @@
             </div>
             <div class="table-row">
                 <div colspan="1" class="table-cell1 title-cabecera">
-                    @if($purchaseRequest->paymentMethod === 'transference')
                     <p>Clabe interbancaria</p>
-                    @endif
                 </div>
 
                 <div colspan="1" class="table-cell1 title-cabecera">
@@ -312,11 +313,15 @@
                     <div class="info-cabecera">
                         <p>{{$purchaseRequest->account->clabe}}&nbsp;</p>
                     </div>
+                    @else
+                    <div class="info-cabecera">
+                        <p>N/A</p>
+                    </div>
                     @endif
                 </div>
                 <div colspan="1" class="table-cell1 title-cabecera">
                     <p style="font-size:8pt; margin-top:-8px;">
-                        {{$purchaseRequest->created_at}}
+                        {{$Helpers->formatTimezoneToDate($purchaseRequest->created_at)}}
                     </p>
                 </div>
             </div>
@@ -365,7 +370,7 @@
                     <p>{{$det->concept}}</p>
                 </div>
                 <div colspan="1" class="table-cell1 cell-detalle">
-                    <p>{{$det->movementType}}</p>
+                    <p>{{$Helpers->movementTypes($det->movementType)}}</p>
                 </div>
                 <div colspan="1" class="table-cell1 cell-detalle">
                     <p>{{$det->observation}}</p>

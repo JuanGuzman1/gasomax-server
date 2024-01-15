@@ -43,7 +43,7 @@ class PurchaseRequest extends Model
      */
     public function details(): HasMany
     {
-        return $this->hasMany(PurchaseRequestDetail::class);
+        return $this->hasMany(PurchaseRequestDetail::class, 'purchase_request_id', 'id');
     }
 
     /**
