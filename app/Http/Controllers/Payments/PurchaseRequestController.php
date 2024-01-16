@@ -284,10 +284,20 @@ class PurchaseRequestController extends Controller
      */
     public function getBalancePayments(string $id)
     {
-
+        $pendingPayments = [];
         $pendingDetail = PurchaseRequestDetail::findOrFail($id);
+        array_unshift($pendingPayments, $pendingDetail);
 
+        $last_id = $pendingDetail->purchase_detail_pending_id;
 
-        // $details = PurchaseRequestDetail::whereHas('pr');
+        while ($last_id) {
+            if ($last_id != null) {
+                $pendingDetail = PurchaseRequestDetail::findOrFail($last_id);
+
+                $last_id = $pendingDetail->purchase_detail_pending_id;
+                array_unshift($pendingPayments, $pendingDetail);
+            }
+        }
+        return $pendingPayments;
     }
 }
