@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\Administration\BankController;
+use App\Http\Controllers\Administration\DepartmentController;
 use App\Http\Controllers\Administration\ProviderController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\Payments\PurchaseRequestController;
 use App\Http\Controllers\Payments\PurchaseRequestObservationController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,30 +20,35 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+//login
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout']);
+
+Route::middleware('auth:api')->group(function () {
+    //departments
+    Route::apiResource('department', DepartmentController::class);
+    Route::get('/select/department', [DepartmentController::class, 'select']);
+    //banks
+    Route::apiResource('bank', BankController::class);
+    Route::get('/select/bank', [BankController::class, 'select']);
+
+    //providers
+    Route::apiResource('/provider', ProviderController::class);
+    Route::get('/excel/provider/export', [ProviderController::class, 'export']);
+    Route::get('/select/provider', [ProviderController::class, 'select']);
+
+    //files
+    Route::apiResource('/file', FileController::class);
+    Route::get('/download/{file}', [FileController::class, 'download']);
+    Route::delete('/{model_id}/{model_type}/destroy/files', [FileController::class, 'destroyByModel']);
+
+    //purchaseRequest
+    Route::apiResource('/purchaseRequest', PurchaseRequestController::class);
+    Route::apiResource('/purchaseRequestObservation', PurchaseRequestObservationController::class);
+    Route::get('/pdf/purchaseRequest/export/{purchaseRequest}', [PurchaseRequestController::class, 'exportPDF']);
+    Route::get('/pending/details/purchaseRequest', [PurchaseRequestController::class, 'showPendingPaymentDetails']);
+    Route::put('/reject/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'reject']);
+    Route::put('/approve/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'approve']);
+    Route::get('/pending/purchaseRequest', [PurchaseRequestController::class, 'getPendingPayments']);
+    Route::get('/balance/purchaseRequestDetail/{id}', [PurchaseRequestController::class, 'getBalancePayments']);
 });
-
-//banks
-Route::apiResource('bank', BankController::class);
-Route::get('/select/bank', [BankController::class, 'select']);
-
-//providers
-Route::apiResource('/provider', ProviderController::class);
-Route::get('/excel/provider/export', [ProviderController::class, 'export']);
-Route::get('/select/provider', [ProviderController::class, 'select']);
-
-//files
-Route::apiResource('/file', FileController::class);
-Route::get('/download/{file}', [FileController::class, 'download']);
-Route::delete('/{model_id}/{model_type}/destroy/files', [FileController::class, 'destroyByModel']);
-
-//purchaseRequest
-Route::apiResource('/purchaseRequest', PurchaseRequestController::class);
-Route::apiResource('/purchaseRequestObservation', PurchaseRequestObservationController::class);
-Route::get('/pdf/purchaseRequest/export/{purchaseRequest}', [PurchaseRequestController::class, 'exportPDF']);
-Route::get('/pending/details/purchaseRequest', [PurchaseRequestController::class, 'showPendingPaymentDetails']);
-Route::put('/reject/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'reject']);
-Route::put('/approve/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'approve']);
-Route::get('/pending/purchaseRequest', [PurchaseRequestController::class, 'getPendingPayments']);
-Route::get('/balance/purchaseRequestDetail/{id}', [PurchaseRequestController::class, 'getBalancePayments']);
