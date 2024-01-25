@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Administration;
+namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-use App\Models\Administration\Department;
+use App\Models\Users\Department;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
 

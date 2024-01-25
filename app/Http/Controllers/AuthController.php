@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Users\User;
 use App\Traits\ApiResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Passport\Passport;
 
 class AuthController extends Controller
 {
@@ -15,7 +16,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $user = User::with('modules')->where('email', $request->email)->first();
         if (!$user) {
             return $this->errorResponse('Not user found');
         }
@@ -43,5 +44,13 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
+    }
+
+    public function getUser()
+    {
+        $user = Auth::user();
+        $userData = User::with(['department', 'modules'])->find($user->id);
+
+        return $this->successResponse($userData);
     }
 }
