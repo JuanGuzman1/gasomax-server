@@ -16,7 +16,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $user = User::with('modules')->where('email', $request->email)->first();
+        $user = User::with(['department', 'modules'])->where('email', $request->email)->first();
         if (!$user) {
             return $this->errorResponse('Not user found');
         }
@@ -37,10 +37,14 @@ class AuthController extends Controller
     public function logout()
     {
         try {
-
-            Auth::logout();
-
-            return $this->successResponse(null, 'Sesión finalizada.');
+            if (Auth::check()) {
+                $user = Auth::user();
+                $user->tokens->each(function ($token) {
+                    $token->delete();
+                });
+                return $this->successResponse(null, 'Sesión finalizada.');
+            }
+            return response()->json(['message' => 'No user authenticated'], 401);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }

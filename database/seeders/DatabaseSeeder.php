@@ -11,13 +11,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Users\User::create([
-            'name' => 'admin',
-            'email' => config('app.email'),
-            'password' => config('app.password'),
-            'role' => 'superadmin'
-        ]);
         $this->call(ModulesSeeder::class);
         $this->call(PermissionsSeeder::class);
+        $this->call(UsersSeeder::class);
     }
 }

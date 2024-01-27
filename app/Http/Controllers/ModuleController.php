@@ -33,7 +33,12 @@ class ModuleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $data = $this->module->create($request->all());
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\Payments\PurchaseRequestController;
 use App\Http\Controllers\Payments\PurchaseRequestObservationController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Users\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,9 +25,9 @@ use Illuminate\Support\Facades\Route;
 
 //login
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
     //departments
     Route::apiResource('department', DepartmentController::class);
     Route::get('/select/department', [DepartmentController::class, 'select']);
@@ -57,8 +58,11 @@ Route::middleware('auth:api')->group(function () {
     //users
     Route::apiResource('/user', UserController::class);
     Route::get('/auth/user', [AuthController::class, 'getUser']);
-});
 
-//modules
-Route::apiResource('/module', ModuleController::class);
-Route::post('/assign/module', [ModuleController::class, 'assign']);
+    //modules
+    Route::apiResource('/module', ModuleController::class);
+    Route::post('/assign/module', [ModuleController::class, 'assign']);
+
+    //permissions
+    Route::apiResource('/permission', PermissionController::class);
+});
