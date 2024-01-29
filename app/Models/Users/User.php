@@ -64,4 +64,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserModule::class)->with('module');
     }
+
+    /**
+     * Get the permissions for the user.
+     */
+    public function permissions(): HasMany
+    {
+        return $this->hasMany(UserPermission::class)->with('permission');
+    }
 }

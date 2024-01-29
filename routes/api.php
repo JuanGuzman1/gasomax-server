@@ -65,4 +65,5 @@ Route::middleware('auth:api')->group(function () {
 
     //permissions
     Route::apiResource('/permission', PermissionController::class);
+    Route::post('/assign/permission', [PermissionController::class, 'assign']);
 });

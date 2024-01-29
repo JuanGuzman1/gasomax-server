@@ -24,8 +24,8 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $name = $request->name;
-
-        return $this->user->with(['department', 'modules'])->when($name, function ($query) use ($name) {
+        //TODO GET PERMISSIONS IN ANOTHER FUNCTION
+        return $this->user->with(['department', 'modules', 'permissions'])->when($name, function ($query) use ($name) {
             return $query->where('name',  'like', '%' . $name . '%');
         })->orderBy('created_at', 'desc')->paginate(10);
     }

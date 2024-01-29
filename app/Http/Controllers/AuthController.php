@@ -16,7 +16,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $user = User::with(['department', 'modules'])->where('email', $request->email)->first();
+        $user = User::with(['department', 'modules', 'permissions'])->where('email', $request->email)->first();
         if (!$user) {
             return $this->errorResponse('Not user found');
         }
@@ -53,7 +53,7 @@ class AuthController extends Controller
     public function getUser()
     {
         $user = Auth::user();
-        $userData = User::with(['department', 'modules'])->find($user->id);
+        $userData = User::with(['department', 'modules', 'permissions'])->find($user->id);
 
         return $this->successResponse($userData);
     }
