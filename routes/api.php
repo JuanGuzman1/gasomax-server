@@ -52,6 +52,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/pending/details/purchaseRequest', [PurchaseRequestController::class, 'showPendingPaymentDetails']);
     Route::put('/reject/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'reject']);
     Route::put('/approve/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'approve']);
+    Route::put('/pay/purchaseRequest/{purchaseRequest}', [PurchaseRequestController::class, 'pay']);
     Route::get('/pending/purchaseRequest', [PurchaseRequestController::class, 'getPendingPayments']);
     Route::get('/balance/purchaseRequestDetail/{id}', [PurchaseRequestController::class, 'getBalancePayments']);
 

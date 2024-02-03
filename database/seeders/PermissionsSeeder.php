@@ -60,6 +60,10 @@ class PermissionsSeeder extends Seeder
             'module_id' => 3,
         ]);
         \App\Models\Permission::create([
+            'name' => 'show',
+            'module_id' => 3,
+        ]);
+        \App\Models\Permission::create([
             'name' => 'edit',
             'module_id' => 3,
         ]);

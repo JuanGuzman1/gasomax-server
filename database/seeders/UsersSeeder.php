@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Module;
+use App\Models\Permission;
 use App\Models\Users\UserModule;
+use App\Models\Users\UserPermission;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,6 +23,7 @@ class UsersSeeder extends Seeder
             'role' => 'superadmin'
         ]);
         $modules = Module::all();
+        $permissions = Permission::all();
 
         foreach ($modules as $m) {
             $userModule = new UserModule(
@@ -29,6 +32,15 @@ class UsersSeeder extends Seeder
                 ]
             );
             $admin->modules()->save($userModule);
+        }
+
+        foreach ($permissions as $p) {
+            $userPermission = new UserPermission(
+                [
+                    'permission_id' => $p->id
+                ]
+            );
+            $admin->permissions()->save($userPermission);
         }
     }
 }

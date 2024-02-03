@@ -22,6 +22,7 @@ class MorphTypesProvider extends ServiceProvider
     {
         Relation::enforceMorphMap([
             'provider' => 'App\Models\Administration\Provider',
+            'purchaseRequest' => 'App\Models\Payments\PurchaseRequest',
         ]);
     }
 }

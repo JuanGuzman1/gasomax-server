@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('business');
             $table->enum('paymentMethod', ['transference', 'check', 'cash']);
             $table->enum('status', ['pending', 'approved', 'paid', 'rejected'])->default('pending');
+            $table->date('paymentDate')->nullable();
             $table->boolean('pettyCash');
             $table->timestamps();
 

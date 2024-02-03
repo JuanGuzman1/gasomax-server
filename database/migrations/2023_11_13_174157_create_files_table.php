@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('files', function (Blueprint $table) {
             $table->id();
+            $table->string('localName');
             $table->string('name');
             $table->string('tag');
             $table->string('extension');

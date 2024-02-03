@@ -32,7 +32,7 @@ class PurchaseRequestController extends Controller
         $petitioner = $request->petitioner;
         $status = $request->status;
 
-        return $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+        return $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
             ->when($provider, function ($query) use ($provider) {
                 return $query->whereHas('provider', function ($q) use ($provider) {
                     $q->where('name',  'like', '%' . $provider . '%');
@@ -76,7 +76,7 @@ class PurchaseRequestController extends Controller
                     $purchaseRequest->details()->save($detail);
                 }
             }
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
                 ->where('id', $purchaseRequest->id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {
@@ -117,7 +117,7 @@ class PurchaseRequestController extends Controller
                     $purchaseRequest->details()->save($detail);
                 }
             }
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {
@@ -207,7 +207,7 @@ class PurchaseRequestController extends Controller
 
                 $purchaseRequest->observations()->save($observation);
             }
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {
@@ -231,7 +231,32 @@ class PurchaseRequestController extends Controller
             ]);
             $purchaseRequest->observations()->save($observation);
 
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
+                ->where('id', $id)->firstOrFail();
+            return $this->successResponse($purchaseRequestRes);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * pay the specified request in storage.
+     */
+    public function pay(Request $request, string $id)
+    {
+        try {
+            $purchaseRequest = $this->purchaseRequest->find($id);
+            $purchaseRequest->update([
+                'paymentDate' => $request->paymentDate,
+                'status' => 'paid'
+            ]);
+            $observation = new PurchaseRequestObservation([
+                'message' => 'Cotización pagada',
+                'user_id' => $request->user_id
+            ]);
+            $purchaseRequest->observations()->save($observation);
+
+            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {

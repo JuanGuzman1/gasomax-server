@@ -3,10 +3,12 @@
 namespace App\Models\Payments;
 
 use App\Models\Administration\Provider;
+use App\Models\File;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class PurchaseRequest extends Model
 {
@@ -19,7 +21,8 @@ class PurchaseRequest extends Model
         'status',
         'pettyCash',
         'provider_id',
-        'petitioner_id'
+        'petitioner_id',
+        'paymentDate'
     ];
 
     /**
@@ -52,5 +55,13 @@ class PurchaseRequest extends Model
     public function observations(): HasMany
     {
         return $this->hasMany(PurchaseRequestObservation::class);
+    }
+
+    /**
+     * Get all of the provider's purchaseRequest.
+     */
+    public function files(): MorphMany
+    {
+        return $this->morphMany(File::class, 'fileable');
     }
 }

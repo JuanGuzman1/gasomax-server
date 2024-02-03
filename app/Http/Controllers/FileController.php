@@ -42,6 +42,7 @@ class FileController extends Controller
         $size = $filesystem->size($path) / 1000;
 
         return $this->file->create([
+            'localName' => $request->localName,
             'name' => basename($path),
             'tag' => $request->tag,
             'extension' => $request->file('file')->getClientOriginalExtension(),
