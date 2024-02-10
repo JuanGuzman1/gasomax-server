@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('localName');
             $table->string('name');
             $table->string('tag');
+            $table->text('description')->nullable();
             $table->string('extension');
             $table->float('size');
             $table->string('path');

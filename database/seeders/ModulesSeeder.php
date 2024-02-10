@@ -24,6 +24,10 @@ class ModulesSeeder extends Seeder
             ],
             [
                 'module' => 'payments',
+                'submodule' => 'quotes'
+            ],
+            [
+                'module' => 'payments',
                 'submodule' => 'purchaseRequest'
             ],
             [

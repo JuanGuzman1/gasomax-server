@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('purchase_request_concepts', function (Blueprint $table) {
+        Schema::create('quote_observations', function (Blueprint $table) {
             $table->id();
-            $table->string('charge');
-            $table->string('concept');
-            $table->unsignedInteger('department_id')->nullable();
+            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('quote_id');
+            $table->text('message');
             $table->timestamps();
 
-            $table->foreign('department_id')->references('id')->on('departments');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('quote_id')->references('id')->on('quotes')->onDelete('cascade');
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('purchase_request_concepts');
+        Schema::dropIfExists('quote_observations');
     }
 };

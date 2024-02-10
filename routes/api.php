@@ -8,6 +8,9 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\Payments\PurchaseRequestController;
 use App\Http\Controllers\Payments\PurchaseRequestObservationController;
+use App\Http\Controllers\Payments\QuoteConceptController;
+use App\Http\Controllers\Payments\QuoteController;
+use App\Http\Controllers\Payments\QuoteObservationController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Users\UserController;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +47,14 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/file', FileController::class);
     Route::get('/download/{file}', [FileController::class, 'download']);
     Route::delete('/{model_id}/{model_type}/destroy/files', [FileController::class, 'destroyByModel']);
+
+    //quoteConcepts
+    Route::get('/select/charge', [QuoteConceptController::class, 'getCharges']);
+    Route::get('/select/concept/charge', [QuoteConceptController::class, 'getConceptsByCharge']);
+
+    //quotes
+    Route::apiResource('/quote', QuoteController::class);
+    Route::apiResource('/quoteObservation', QuoteObservationController::class);
 
     //purchaseRequest
     Route::apiResource('/purchaseRequest', PurchaseRequestController::class);
