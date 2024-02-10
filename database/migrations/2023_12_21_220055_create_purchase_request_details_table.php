@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('purchase_request_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('purchase_request_id');
+            $table->unsignedBigInteger('purchase_request_id');
             $table->string('charge');
             $table->string('concept');
             $table->enum('movementType', ['advance', 'settlement', 'payment']);
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->float('totalAmount');
             $table->float('paymentAmount');
             $table->float('balance');
-            $table->unsignedInteger('purchase_detail_pending_id')->nullable();
+            $table->unsignedBigInteger('purchase_detail_pending_id')->nullable();
             $table->timestamps();
 
             $table->foreign('purchase_request_id')->references('id')->on('purchase_requests')->onDelete('cascade');

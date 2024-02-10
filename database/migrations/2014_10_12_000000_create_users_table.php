@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->unsignedInteger('department_id')->nullable();
+            $table->unsignedBigInteger('department_id')->nullable();
             $table->boolean('active')->default(true);
             $table->string('role')->nullable();
             $table->string('nss')->nullable();

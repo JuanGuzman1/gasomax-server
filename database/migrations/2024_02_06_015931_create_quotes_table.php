@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('quotes', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->unsignedInteger('petitioner_id');
-            $table->unsignedInteger('quote_concept_id');
+            $table->unsignedBigInteger('petitioner_id');
+            $table->unsignedBigInteger('quote_concept_id');
             $table->text('description')->nullable();
             $table->integer('numProviders')->nullable();
             $table->string('recommendedProviders')->nullable();
@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('unit');
             $table->boolean('rejectQuotes')->default(false);
             $table->float('approvedAmount')->default(0);
-            $table->unsignedInteger('provider_id')->nullable();
-            $table->unsignedInteger('provider_account_id')->nullable();
+            $table->unsignedBigInteger('provider_id')->nullable();
+            $table->unsignedBigInteger('provider_account_id')->nullable();
             $table->boolean('paymentWithoutInvoice')->default(false);
             $table->enum('status', ['sent', 'inprogress', 'approved', 'rejected'])->default('sent');
             $table->timestamps();

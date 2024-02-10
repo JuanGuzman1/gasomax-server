@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('bankAccount')->nullable();
             $table->string('clabe')->nullable();
             $table->boolean('primary')->default(false);
-            $table->unsignedInteger('bank_id');
-            $table->unsignedInteger('provider_id');
+            $table->unsignedBigInteger('bank_id');
+            $table->unsignedBigInteger('provider_id');
             $table->timestamps();
 
             $table->foreign('bank_id')->references('id')->on('banks');

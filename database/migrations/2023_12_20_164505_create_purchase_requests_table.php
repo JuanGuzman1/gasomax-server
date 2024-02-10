@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('purchase_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('provider_id');
-            $table->unsignedInteger('petitioner_id');
+            $table->unsignedBigInteger('provider_id');
+            $table->unsignedBigInteger('petitioner_id');
             $table->boolean('extraordinary');
             $table->string('station');
             $table->string('business');

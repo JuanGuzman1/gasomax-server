@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('quote_observations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('quote_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('quote_id');
             $table->text('message');
             $table->timestamps();
 

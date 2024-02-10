@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('purchase_request_observations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('purchase_request_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('purchase_request_id');
             $table->text('message');
             $table->timestamps();
 
