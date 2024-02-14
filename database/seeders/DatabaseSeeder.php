@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
             ModulesSeeder::class,
             PermissionsSeeder::class,
             UsersSeeder::class,
-            QuoteConceptsExcelSeeder::class
+            QuoteConceptsExcelSeeder::class,
+            UnitsExcelSeeder::class
         ]);
     }
 }

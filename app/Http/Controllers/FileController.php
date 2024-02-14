@@ -45,6 +45,7 @@ class FileController extends Controller
             'localName' => $request->localName,
             'name' => basename($path),
             'tag' => $request->tag,
+            'description' => $request->description,
             'extension' => $request->file('file')->getClientOriginalExtension(),
             'size' => $size,
             'path' => $path,

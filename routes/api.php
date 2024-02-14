@@ -3,6 +3,7 @@
 use App\Http\Controllers\Administration\BankController;
 use App\Http\Controllers\Users\DepartmentController;
 use App\Http\Controllers\Administration\ProviderController;
+use App\Http\Controllers\Administration\UnitController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ModuleController;
@@ -51,6 +52,11 @@ Route::middleware('auth:api')->group(function () {
     //quoteConcepts
     Route::get('/select/charge', [QuoteConceptController::class, 'getCharges']);
     Route::get('/select/concept/charge', [QuoteConceptController::class, 'getConceptsByCharge']);
+
+    //units
+    Route::get('/select/line', [UnitController::class, 'getLines']);
+    Route::get('/select/unit/line', [UnitController::class, 'getUnitsByLine']);
+
 
     //quotes
     Route::apiResource('/quote', QuoteController::class);

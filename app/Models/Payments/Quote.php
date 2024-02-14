@@ -4,10 +4,12 @@ namespace App\Models\Payments;
 
 use App\Models\Administration\Provider;
 use App\Models\Administration\ProviderAccount;
+use App\Models\File;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Quote extends Model
 {
@@ -31,7 +33,7 @@ class Quote extends Model
 
 
     /**
-     * Get the provider of the purchaseRequest.
+     * Get the provider of the quote.
      */
     public function provider(): BelongsTo
     {
@@ -39,7 +41,7 @@ class Quote extends Model
     }
 
     /**
-     * Get the provider of the purchaseRequest.
+     * Get the provider of the quote.
      */
     public function providerAccount(): BelongsTo
     {
@@ -47,7 +49,7 @@ class Quote extends Model
     }
 
     /**
-     * Get the user that owns the purchaseRequest.
+     * Get the user that owns the quote.
      */
     public function petitioner(): BelongsTo
     {
@@ -56,10 +58,18 @@ class Quote extends Model
 
 
     /**
-     * Get the user that owns the purchaseRequest.
+     * Get the user that owns the quote.
      */
     public function quoteConcept(): BelongsTo
     {
         return $this->belongsTo(QuoteConcept::class, 'quote_concept_id');
+    }
+
+    /**
+     * Get all of the files quote.
+     */
+    public function files(): MorphMany
+    {
+        return $this->morphMany(File::class, 'fileable');
     }
 }

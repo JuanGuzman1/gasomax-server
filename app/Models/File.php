@@ -11,6 +11,7 @@ class File extends Model
         'localName',
         'name',
         'tag',
+        'description',
         'extension',
         'size',
         'path',
