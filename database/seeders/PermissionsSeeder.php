@@ -83,6 +83,14 @@ class PermissionsSeeder extends Seeder
             'name' => 'authorize',
             'module_id' => 3,
         ]);
+        \App\Models\Permission::create([
+            'name' => 'authorize.ok',
+            'module_id' => 3,
+        ]);
+        \App\Models\Permission::create([
+            'name' => 'upload.quote',
+            'module_id' => 3,
+        ]);
 
         //PurchaseRequest permissions
         \App\Models\Permission::create([

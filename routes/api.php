@@ -43,6 +43,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/provider', ProviderController::class);
     Route::get('/excel/provider/export', [ProviderController::class, 'export']);
     Route::get('/select/provider', [ProviderController::class, 'select']);
+    Route::get('/select/account/provider/{id}', [ProviderController::class, 'selectAccountsByProvider']);
 
     //files
     Route::apiResource('/file', FileController::class);

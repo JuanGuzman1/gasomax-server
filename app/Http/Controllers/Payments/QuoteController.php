@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Payments;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payments\Quote;
+use App\Models\Payments\QuoteObservation;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 
@@ -74,6 +75,17 @@ class QuoteController extends Controller
         try {
             $quote = $this->quote->find($id);
             $quote->update($request->all());
+
+            if ($request->observation) {
+
+                $observation = new QuoteObservation([
+                    'message' => $request->observation,
+                    'user_id' => $quote->petitioner_id
+                ]);
+
+                $quote->observations()->save($observation);
+            }
+
             $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($quoteRes);

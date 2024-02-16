@@ -138,4 +138,12 @@ class ProviderController extends Controller
     {
         return $this->provider->orderBy('created_at', 'desc')->get();
     }
+
+    /**
+     * Display all of the resource for select.
+     */
+    public function selectAccountsByProvider(String $id)
+    {
+        return ProviderAccount::with(['bank'])->where('provider_id', $id)->orderBy('created_at', 'desc')->get();
+    }
 }

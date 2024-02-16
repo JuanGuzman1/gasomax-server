@@ -9,6 +9,7 @@ use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Quote extends Model
@@ -71,5 +72,13 @@ class Quote extends Model
     public function files(): MorphMany
     {
         return $this->morphMany(File::class, 'fileable');
+    }
+
+    /**
+     * Get the observations of the purchaseRequest.
+     */
+    public function observations(): HasMany
+    {
+        return $this->hasMany(QuoteObservation::class);
     }
 }
