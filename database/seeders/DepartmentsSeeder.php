@@ -18,10 +18,13 @@ class DepartmentsSeeder extends Seeder
             'MKT',
             'NORMATIVIDAD',
             'NOMINA',
-            'GESTIORIA',
+            'GESTORIA',
             'SISTEMAS',
             'OPERACION',
-            'DIRECCION'
+            'DIRECCION',
+            'CARWASH',
+            'RESTAURANTE',
+            'MAXSTORE'
         ];
         foreach ($departments as $d) {
             $departmentExists = \App\Models\Users\Department::where('name', $d)

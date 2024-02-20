@@ -26,7 +26,10 @@ return new class extends Migration
             $table->unsignedBigInteger('provider_id')->nullable();
             $table->unsignedBigInteger('provider_account_id')->nullable();
             $table->boolean('paymentWithoutInvoice')->default(false);
-            $table->enum('status', ['sent', 'inprogress', 'ok', 'approved', 'rejected'])->default('sent');
+            $table->enum('status', ['sent', 'inprogress', 'approved', 'ok', 'authorized', 'rejected'])->default('sent');
+            $table->boolean('onePayment')->default(false);
+            $table->boolean('multiplePayments')->default(false);
+            $table->string('suggestedProvider')->nullable();
             $table->timestamps();
 
 

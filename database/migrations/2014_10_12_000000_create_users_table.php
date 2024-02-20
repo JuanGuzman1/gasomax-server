@@ -19,13 +19,14 @@ return new class extends Migration
             $table->string('password');
             $table->unsignedBigInteger('department_id')->nullable();
             $table->boolean('active')->default(true);
-            $table->string('role')->nullable();
+            $table->unsignedBigInteger('role_id')->nullable();
             $table->string('nss')->nullable();
             $table->string('payrollNumber')->nullable();
             $table->rememberToken();
             $table->timestamps();
 
             $table->foreign('department_id')->references('id')->on('departments');
+            $table->foreign('role_id')->references('id')->on('roles');
         });
     }
 

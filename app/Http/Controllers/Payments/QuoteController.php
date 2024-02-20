@@ -28,7 +28,7 @@ class QuoteController extends Controller
         $petitioner = $request->petitioner;
         $status = $request->status;
 
-        return $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files'])
+        return $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images'])
             ->when($provider, function ($query) use ($provider) {
                 return $query->whereHas('provider', function ($q) use ($provider) {
                     $q->where('name',  'like', '%' . $provider . '%');
@@ -50,7 +50,7 @@ class QuoteController extends Controller
     {
         try {
             $quote = $this->quote->create($request->all());
-            $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files'])
+            $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images'])
                 ->where('id', $quote->id)->firstOrFail();
             return $this->successResponse($quoteRes);
         } catch (\Exception $e) {
@@ -86,7 +86,7 @@ class QuoteController extends Controller
                 $quote->observations()->save($observation);
             }
 
-            $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files'])
+            $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($quoteRes);
         } catch (\Exception $e) {

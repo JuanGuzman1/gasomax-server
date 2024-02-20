@@ -29,7 +29,10 @@ class Quote extends Model
         'provider_id',
         'provider_account_id',
         'paymentWithoutInvoice',
-        'status'
+        'status',
+        'onePayment',
+        'multiplePayments',
+        'suggestedProvider'
     ];
 
 
@@ -67,11 +70,19 @@ class Quote extends Model
     }
 
     /**
-     * Get all of the files quote.
+     * Get all of the files images quote.
      */
-    public function files(): MorphMany
+    public function images(): MorphMany
     {
         return $this->morphMany(File::class, 'fileable');
+    }
+
+    /**
+     * Get all of the files quote.
+     */
+    public function files(): HasMany
+    {
+        return $this->hasMany(QuoteFile::class);
     }
 
     /**

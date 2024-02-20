@@ -20,7 +20,7 @@ class UsersSeeder extends Seeder
             'name' => 'admin',
             'email' => config('app.email'),
             'password' => config('app.password'),
-            'role' => 'superadmin'
+            'role_id' => 1
         ]);
         $modules = Module::all();
         $permissions = Permission::all();
