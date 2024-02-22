@@ -13,18 +13,17 @@ return new class extends Migration
     {
         Schema::create('purchase_requests', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('provider_id');
+            $table->string('title');
+            $table->float('paymentAmount');
+            $table->unsignedBigInteger('quote_id')->nullable();
             $table->unsignedBigInteger('petitioner_id');
-            $table->boolean('extraordinary');
-            $table->string('station');
-            $table->string('business');
-            $table->enum('paymentMethod', ['transference', 'check', 'cash']);
             $table->enum('status', ['pending', 'approved', 'paid', 'rejected'])->default('pending');
             $table->date('paymentDate')->nullable();
-            $table->boolean('pettyCash');
+            $table->boolean('totalPaymentApproved')->default(false);
+            $table->boolean('totalPaymentModified')->default(false);
             $table->timestamps();
 
-            $table->foreign('provider_id')->references('id')->on('providers');
+            $table->foreign('quote_id')->references('id')->on('quotes');
             $table->foreign('petitioner_id')->references('id')->on('users');
         });
     }

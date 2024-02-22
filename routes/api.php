@@ -11,8 +11,10 @@ use App\Http\Controllers\Payments\PurchaseRequestController;
 use App\Http\Controllers\Payments\PurchaseRequestObservationController;
 use App\Http\Controllers\Payments\QuoteConceptController;
 use App\Http\Controllers\Payments\QuoteController;
+use App\Http\Controllers\Payments\QuoteFileController;
 use App\Http\Controllers\Payments\QuoteObservationController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\Users\RoleController;
 use App\Http\Controllers\Users\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,9 +34,15 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    //roles
+    Route::apiResource('role', RoleController::class);
+    Route::get('/select/role', [RoleController::class, 'select']);
     //departments
     Route::apiResource('department', DepartmentController::class);
     Route::get('/select/department', [DepartmentController::class, 'select']);
+
+
     //banks
     Route::apiResource('bank', BankController::class);
     Route::get('/select/bank', [BankController::class, 'select']);
@@ -62,6 +70,10 @@ Route::middleware('auth:api')->group(function () {
     //quotes
     Route::apiResource('/quote', QuoteController::class);
     Route::apiResource('/quoteObservation', QuoteObservationController::class);
+    //quoteFiles
+    Route::apiResource('/quoteFile', QuoteFileController::class);
+    Route::get('/quoteFileDownload/{file}', [QuoteFileController::class, 'download']);
+    Route::delete('/{quote_id}/destroy/quoteFiles', [QuoteFileController::class, 'destroyByQuote']);
 
     //purchaseRequest
     Route::apiResource('/purchaseRequest', PurchaseRequestController::class);

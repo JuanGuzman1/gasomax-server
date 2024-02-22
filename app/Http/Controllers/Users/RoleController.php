@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Payments;
+namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-use App\Models\Payments\QuoteConcept;
+use App\Models\Users\Role;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 
-class QuoteConceptController extends Controller
+class RoleController extends Controller
 {
+
     use ApiResponseTrait;
 
-    protected $quoteConcept;
+    protected $role;
 
     public function __construct()
     {
-        $this->quoteConcept = new QuoteConcept();
+        $this->role = new Role();
     }
 
 
@@ -62,21 +63,8 @@ class QuoteConceptController extends Controller
     /**
      * Display all of the resource for select.
      */
-
-    public function getCharges(Request $request)
+    public function select()
     {
-        $departmentID = $request->department_id;
-        return $this->quoteConcept->select('charge')->where('department_id', $departmentID)->groupBy('charge')->get();
-    }
-
-    /**
-     * Display all of the resource for select.
-     */
-    public function getConceptsByCharge(Request $request)
-    {
-        $charge = $request->charge;
-        return $this->quoteConcept->select('id', 'concept')
-            ->where('charge', $charge)
-            ->orderBy('created_at', 'desc')->get();
+        return $this->role->orderBy('created_at', 'desc')->get();
     }
 }

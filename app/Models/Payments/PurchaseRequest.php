@@ -2,7 +2,7 @@
 
 namespace App\Models\Payments;
 
-use App\Models\Administration\Provider;
+
 use App\Models\File;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,23 +14,22 @@ class PurchaseRequest extends Model
 {
     protected $table = 'purchase_requests';
     protected $fillable = [
-        'extraordinary',
-        'station',
-        'business',
-        'paymentMethod',
         'status',
-        'pettyCash',
-        'provider_id',
+        'quote_id',
         'petitioner_id',
-        'paymentDate'
+        'paymentDate',
+        'title',
+        'paymentAmount',
+        'totalPaymentApproved',
+        'totalPaymentModified'
     ];
 
     /**
-     * Get the provider of the purchaseRequest.
+     * Get the quote of the purchaseRequest.
      */
-    public function provider(): BelongsTo
+    public function quote(): BelongsTo
     {
-        return $this->belongsTo(Provider::class);
+        return $this->belongsTo(Quote::class);
     }
 
     /**
@@ -41,13 +40,6 @@ class PurchaseRequest extends Model
         return $this->belongsTo(User::class, 'petitioner_id');
     }
 
-    /**
-     * Get the details of the purchaseRequest.
-     */
-    public function details(): HasMany
-    {
-        return $this->hasMany(PurchaseRequestDetail::class, 'purchase_request_id', 'id');
-    }
 
     /**
      * Get the observations of the purchaseRequest.

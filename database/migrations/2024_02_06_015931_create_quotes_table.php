@@ -30,6 +30,7 @@ return new class extends Migration
             $table->boolean('onePayment')->default(false);
             $table->boolean('multiplePayments')->default(false);
             $table->string('suggestedProvider')->nullable();
+            $table->float('balance')->default(0);
             $table->timestamps();
 
 
