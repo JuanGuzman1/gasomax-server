@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('purchase_requests', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->float('totalAmount');
             $table->float('paymentAmount');
             $table->unsignedBigInteger('quote_id')->nullable();
             $table->unsignedBigInteger('petitioner_id');
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->date('paymentDate')->nullable();
             $table->boolean('totalPaymentApproved')->default(false);
             $table->boolean('totalPaymentModified')->default(false);
+            $table->float('balance')->default(0);
             $table->timestamps();
 
             $table->foreign('quote_id')->references('id')->on('quotes');

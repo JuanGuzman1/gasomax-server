@@ -66,10 +66,11 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/select/line', [UnitController::class, 'getLines']);
     Route::get('/select/unit/line', [UnitController::class, 'getUnitsByLine']);
 
-
     //quotes
     Route::apiResource('/quote', QuoteController::class);
     Route::apiResource('/quoteObservation', QuoteObservationController::class);
+    Route::post('/send/pay/quote/{quote}', [QuoteController::class, 'sendPay']);
+
     //quoteFiles
     Route::apiResource('/quoteFile', QuoteFileController::class);
     Route::get('/quoteFileDownload/{file}', [QuoteFileController::class, 'download']);

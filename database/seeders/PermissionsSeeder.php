@@ -80,11 +80,23 @@ class PermissionsSeeder extends Seeder
             'module_id' => 3,
         ]);
         \App\Models\Permission::create([
-            'name' => 'authorize',
+            'name' => 'approve',
             'module_id' => 3,
         ]);
         \App\Models\Permission::create([
-            'name' => 'authorize.ok',
+            'name' => 'authorize.minor.1000',
+            'module_id' => 3,
+        ]);
+        \App\Models\Permission::create([
+            'name' => 'authorize.mayor.1000',
+            'module_id' => 3,
+        ]);
+        \App\Models\Permission::create([
+            'name' => 'authorize.minor.5000',
+            'module_id' => 3,
+        ]);
+        \App\Models\Permission::create([
+            'name' => 'authorize.mayor.5000',
             'module_id' => 3,
         ]);
         \App\Models\Permission::create([

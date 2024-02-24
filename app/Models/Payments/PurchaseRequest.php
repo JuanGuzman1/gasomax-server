@@ -20,6 +20,7 @@ class PurchaseRequest extends Model
         'paymentDate',
         'title',
         'paymentAmount',
+        'totalAmount',
         'totalPaymentApproved',
         'totalPaymentModified'
     ];

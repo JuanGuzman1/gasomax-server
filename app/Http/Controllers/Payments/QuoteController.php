@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Payments;
 
 use App\Http\Controllers\Controller;
+use App\Models\Payments\PurchaseRequest;
 use App\Models\Payments\Quote;
+use App\Models\Payments\QuoteFile;
 use App\Models\Payments\QuoteObservation;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class QuoteController extends Controller
 {
@@ -86,6 +89,25 @@ class QuoteController extends Controller
                 $quote->observations()->save($observation);
             }
 
+            if ($request->selectedQuoteID) {
+                $quoteFile = QuoteFile::find($request->selectedQuoteID);
+                if ($quoteFile) {
+                    $quoteFile->selectedQuoteFile = 1;
+                    $quoteFile->save();
+                }
+            }
+
+            if ($request->status === 'authorized' || $request->status === 'rejected') {
+                $status = $request->status === 'authorized' ? 'AUTORIZADO' : 'RECHAZADO';
+                $observation = new QuoteObservation([
+                    'message' => $status . ' por ' . Auth::user()->name,
+                    'user_id' => Auth::user()->id
+                ]);
+
+                $quote->observations()->save($observation);
+            }
+
+
             $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($quoteRes);
@@ -102,6 +124,48 @@ class QuoteController extends Controller
         try {
             $quote = $this->quote->find($id);
             $data = $quote->delete();
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * Send pay the specified resource in storage.
+     */
+    public function sendPay(Request $request, string $id)
+    {
+        try {
+            $quote = $this->quote->find($id);
+            $quote->update($request->all());
+
+
+            if ($request->status === 'sentPay') {
+                $observation = new QuoteObservation([
+                    'message' => 'ENVIADO A PROCESO DE PAGO' . ' por ' . Auth::user()->name,
+                    'user_id' => Auth::user()->id
+                ]);
+                $quote->observations()->save($observation);
+            }
+
+            $paymentRequest = new PurchaseRequest([
+                'title' => $quote->title,
+                'quote_id' => $quote->id,
+                'totalAmount' => $quote->approvedAmount,
+                'paymentAmount' => $quote->approvedAmount,
+                'petitioner_id' => Auth::user()->id
+            ]);
+            $paymentRequest->save();
+
+            $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images'])
+                ->where('id', $id)->firstOrFail();
+
+            $data = [
+                'quote' => $quoteRes,
+                'purchaseRequest' => $paymentRequest
+            ];
+
+
             return $this->successResponse($data);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());

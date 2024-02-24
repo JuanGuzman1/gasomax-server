@@ -32,7 +32,7 @@ class PurchaseRequestController extends Controller
         $petitioner = $request->petitioner;
         $status = $request->status;
 
-        return $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
+        return $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
             ->when($provider, function ($query) use ($provider) {
                 return $query->whereHas('provider', function ($q) use ($provider) {
                     $q->where('name',  'like', '%' . $provider . '%');
