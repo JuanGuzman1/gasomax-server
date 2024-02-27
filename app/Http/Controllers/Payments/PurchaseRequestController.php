@@ -28,16 +28,11 @@ class PurchaseRequestController extends Controller
      */
     public function index(Request $request)
     {
-        $provider = $request->provider;
         $petitioner = $request->petitioner;
         $status = $request->status;
 
         return $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
-            ->when($provider, function ($query) use ($provider) {
-                return $query->whereHas('provider', function ($q) use ($provider) {
-                    $q->where('name',  'like', '%' . $provider . '%');
-                });
-            })->when($petitioner, function ($query) use ($petitioner) {
+            ->when($petitioner, function ($query) use ($petitioner) {
                 return $query->whereHas('petitioner', function ($q) use ($petitioner) {
                     $q->where('name',  'like', '%' . $petitioner . '%');
                 });
@@ -54,29 +49,7 @@ class PurchaseRequestController extends Controller
     {
         try {
             $purchaseRequest = $this->purchaseRequest->create($request->all());
-            if ($request->details) {
-                foreach ($request->details as $d) {
-                    $detail = new PurchaseRequestDetail([
-                        'charge' => $d['charge'],
-                        'concept' => $d['concept'],
-                        'movementType' => $d['movementType'],
-                        'observation' => $d['observation'],
-                        'totalAmount' => $d['totalAmount'],
-                        'paymentAmount' => $d['paymentAmount'],
-                        'balance' => $d['totalAmount'] - $d['paymentAmount'],
-                        'purchase_detail_pending_id' => $d['purchase_detail_pending_id']
-                    ]);
-
-                    if ($d['purchase_detail_pending_id']) {
-                        $detailPending = PurchaseRequestDetail::find($d['purchase_detail_pending_id']);
-                        $detailPending->balance = 0;
-                        $detailPending->save();
-                    }
-
-                    $purchaseRequest->details()->save($detail);
-                }
-            }
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
                 ->where('id', $purchaseRequest->id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {
@@ -101,23 +74,7 @@ class PurchaseRequestController extends Controller
         try {
             $purchaseRequest = $this->purchaseRequest->find($id);
             $purchaseRequest->update($request->all());
-            if ($request->details) {
-                $purchaseRequest->details()->delete();
-                foreach ($request->details as $d) {
-                    $detail = new PurchaseRequestDetail([
-                        'charge' => $d['charge'],
-                        'concept' => $d['concept'],
-                        'movementType' => $d['movementType'],
-                        'observation' => $d['observation'],
-                        'totalAmount' => $d['totalAmount'],
-                        'paymentAmount' => $d['paymentAmount'],
-                        'balance' => $d['totalAmount'] - $d['paymentAmount'],
-                    ]);
-
-                    $purchaseRequest->details()->save($detail);
-                }
-            }
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {
@@ -145,17 +102,8 @@ class PurchaseRequestController extends Controller
     public function exportPDF(string $id)
     {
         $functions = new Helpers();
-        $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details'])
+        $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner'])
             ->where('id', $id)->firstOrFail();
-
-        $purchaseRequestRes->import = collect($purchaseRequestRes->details)->reduce(function ($a, $d) {
-            return $a + $d->paymentAmount;
-        }, 0);
-
-        if ($purchaseRequestRes->paymentMethod === 'transference') {
-            $account = $purchaseRequestRes->provider->accounts->firstWhere('primary', 1);
-            $purchaseRequestRes->account = $account;
-        }
 
         $pdf = PDF::loadView('pdf/purchaseRequest', [
             'purchaseRequest' => $purchaseRequestRes,
@@ -169,23 +117,15 @@ class PurchaseRequestController extends Controller
      */
     public function showPendingPaymentDetails(Request $request)
     {
-        $providerID = $request->provider_id;
-        $data = $this->purchaseRequest->with(['details'])
-            ->when($providerID, function ($query) use ($providerID) {
-                return $query->where('provider_id', $providerID);
-            })->get();
-
-        $details = [];
-        foreach ($data as $d) {
-            foreach ($d->details as $det) {
-                if ($det->balance > 0) {
-                    array_push($details, $det);
-                }
-            }
-        }
-
-
-        return $details;
+        $userID = $request->user_id;
+        return $this->purchaseRequest->with(['quote'])
+            ->when($userID, function ($query) use ($userID) {
+                return $query->where('petitioner_id', $userID);
+            })->when($userID, function ($query) use ($userID) {
+                return $query->whereHas('quote', function ($q) use ($userID) {
+                    $q->where('petitioner_id', $userID);
+                });
+            })->where('balance', '>', 0)->get();
     }
 
     /**
@@ -207,7 +147,7 @@ class PurchaseRequestController extends Controller
 
                 $purchaseRequest->observations()->save($observation);
             }
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {
@@ -231,7 +171,7 @@ class PurchaseRequestController extends Controller
             ]);
             $purchaseRequest->observations()->save($observation);
 
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {
@@ -256,7 +196,7 @@ class PurchaseRequestController extends Controller
             ]);
             $purchaseRequest->observations()->save($observation);
 
-            $purchaseRequestRes = $this->purchaseRequest->with(['provider', 'petitioner', 'details', 'files'])
+            $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
         } catch (\Exception $e) {
@@ -271,37 +211,23 @@ class PurchaseRequestController extends Controller
     public function getPendingPayments(Request $request)
     {
         $userID = $request->user_id;
-        $provider = $request->provider;
         $petitioner = $request->petitioner;
 
 
-        $data = $this->purchaseRequest->with(['details', 'petitioner', 'provider'])
+        return $this->purchaseRequest->with(['quote', 'petitioner'])
             ->when($userID, function ($query) use ($userID) {
                 return $query->where('petitioner_id', $userID);
-            })->when($provider, function ($query) use ($provider) {
-                return $query->whereHas('provider', function ($q) use ($provider) {
-                    $q->where('name',  'like', '%' . $provider . '%');
+            })->when($userID, function ($query) use ($userID) {
+                return $query->whereHas('quote', function ($q) use ($userID) {
+                    $q->where('petitioner_id', $userID);
                 });
             })->when($petitioner, function ($query) use ($petitioner) {
                 return $query->whereHas('petitioner', function ($q) use ($petitioner) {
                     $q->where('name',  'like', '%' . $petitioner . '%');
                 });
             })
-            ->whereHas('details', function ($query) {
-                $query->where('balance', '>', 0);
-            })->paginate(10);
-
-
-        foreach ($data as $d) {
-            $filtered = $d->details->filter(function ($item) {
-                if ($item->balance > 0) {
-                    return $item;
-                }
-            })->values();
-            $d->detailsFiltered = $filtered;
-        }
-
-        return $data;
+            ->where('balance', '>', 0)
+            ->paginate(10);
     }
 
     /**
@@ -310,17 +236,17 @@ class PurchaseRequestController extends Controller
     public function getBalancePayments(string $id)
     {
         $pendingPayments = [];
-        $pendingDetail = PurchaseRequestDetail::findOrFail($id);
-        array_unshift($pendingPayments, $pendingDetail);
+        $pendingPayment = PurchaseRequest::findOrFail($id);
+        array_unshift($pendingPayments, $pendingPayment);
 
-        $last_id = $pendingDetail->purchase_detail_pending_id;
+        $last_id = $pendingPayment->purchase_request_pending_id;
 
         while ($last_id) {
             if ($last_id != null) {
-                $pendingDetail = PurchaseRequestDetail::findOrFail($last_id);
+                $pendingPayment = PurchaseRequest::findOrFail($last_id);
 
-                $last_id = $pendingDetail->purchase_detail_pending_id;
-                array_unshift($pendingPayments, $pendingDetail);
+                $last_id = $pendingPayment->purchase_request_pending_id;
+                array_unshift($pendingPayments, $pendingPayment);
             }
         }
         return $pendingPayments;

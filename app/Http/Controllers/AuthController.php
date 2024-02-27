@@ -18,7 +18,7 @@ class AuthController extends Controller
     {
         $user = User::with(['department', 'modules', 'permissions'])->where('email', $request->email)->first();
         if (!$user) {
-            return $this->errorResponse('Not user found');
+            return $this->errorResponse('Usuario o contraseña incorrecto');
         }
 
         if (Hash::check($request->password, $user->password)) {
@@ -31,6 +31,8 @@ class AuthController extends Controller
                 'user' => $user
             ];
             return $this->successResponse($data);
+        } else {
+            return $this->errorResponse('Usuario o contraseña incorrecto');
         }
     }
 

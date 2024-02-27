@@ -79,8 +79,9 @@ class QuoteController extends Controller
             $quote = $this->quote->find($id);
             $quote->update($request->all());
 
-            if ($request->observation) {
 
+            //approve or rejected
+            if ($request->observation) {
                 $observation = new QuoteObservation([
                     'message' => $request->observation,
                     'user_id' => $quote->petitioner_id
@@ -89,6 +90,7 @@ class QuoteController extends Controller
                 $quote->observations()->save($observation);
             }
 
+            //approve
             if ($request->selectedQuoteID) {
                 $quoteFile = QuoteFile::find($request->selectedQuoteID);
                 if ($quoteFile) {
@@ -97,6 +99,7 @@ class QuoteController extends Controller
                 }
             }
 
+            //authorization
             if ($request->status === 'authorized' || $request->status === 'rejected') {
                 $status = $request->status === 'authorized' ? 'AUTORIZADO' : 'RECHAZADO';
                 $observation = new QuoteObservation([

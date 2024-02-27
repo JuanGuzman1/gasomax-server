@@ -18,6 +18,8 @@ class DepartmentsSeeder extends Seeder
             'MKT',
             'NORMATIVIDAD',
             'NOMINA',
+            'TESORERIA',
+            'CONTRALORIA',
             'GESTORIA',
             'SISTEMAS',
             'OPERACION',

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->boolean('totalPaymentApproved')->default(false);
             $table->boolean('totalPaymentModified')->default(false);
             $table->float('balance')->default(0);
+            $table->unsignedBigInteger('purchase_request_pending_id')->nullable();
             $table->timestamps();
 
             $table->foreign('quote_id')->references('id')->on('quotes');
