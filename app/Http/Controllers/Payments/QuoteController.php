@@ -156,7 +156,11 @@ class QuoteController extends Controller
                 'quote_id' => $quote->id,
                 'totalAmount' => $quote->approvedAmount,
                 'paymentAmount' => $quote->approvedAmount,
-                'petitioner_id' => Auth::user()->id
+                'petitioner_id' => Auth::user()->id,
+                'provider_id' => $request->provider_id,
+                'provider_account_id' => $request->provider_account_id,
+                'paymentWithoutInvoice' => $request->paymentWithoutInvoice,
+                'fromQuote' => true
             ]);
             $paymentRequest->save();
 

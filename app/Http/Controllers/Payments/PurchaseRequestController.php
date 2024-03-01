@@ -10,6 +10,9 @@ use App\Traits\ApiResponseTrait;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Helpers\Helpers;
 use App\Models\Payments\PurchaseRequestObservation;
+use App\Models\Payments\Quote;
+use App\Models\Payments\QuoteObservation;
+use Illuminate\Support\Facades\Auth;
 
 class PurchaseRequestController extends Controller
 {
@@ -74,6 +77,29 @@ class PurchaseRequestController extends Controller
         try {
             $purchaseRequest = $this->purchaseRequest->find($id);
             $purchaseRequest->update($request->all());
+
+            if ($request->totalPaymentApproved) {
+                $observation = new PurchaseRequestObservation([
+                    'message' => 'PAGO APROBADO POR ' . Auth::user()->name,
+                    'user_id' => Auth::user()->id
+                ]);
+                $purchaseRequest->status = 'approved';
+                $purchaseRequest->paymentAmount = $purchaseRequest->totalAmount;
+                $purchaseRequest->observations()->save($observation);
+                $purchaseRequest->save();
+            }
+
+            if ($request->totalPaymentModified) {
+                $observation = new PurchaseRequestObservation([
+                    'message' => 'PAGO APROBADO Y MODIFICADO POR ' . Auth::user()->name,
+                    'user_id' => Auth::user()->id
+                ]);
+                $purchaseRequest->status = 'approved';
+                $purchaseRequest->balance = $purchaseRequest->totalAmount - $purchaseRequest->paymentAmount;
+                $purchaseRequest->observations()->save($observation);
+                $purchaseRequest->save();
+            }
+
             $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
@@ -155,29 +181,6 @@ class PurchaseRequestController extends Controller
         }
     }
 
-    /**
-     * approve the specified request in storage.
-     */
-    public function approve(Request $request, string $id)
-    {
-        try {
-            $purchaseRequest = $this->purchaseRequest->find($id);
-            $purchaseRequest->update([
-                'status' => 'approved'
-            ]);
-            $observation = new PurchaseRequestObservation([
-                'message' => 'Cotización aprobada',
-                'user_id' => $request->user_id
-            ]);
-            $purchaseRequest->observations()->save($observation);
-
-            $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
-                ->where('id', $id)->firstOrFail();
-            return $this->successResponse($purchaseRequestRes);
-        } catch (\Exception $e) {
-            return $this->errorResponse($e->getMessage());
-        }
-    }
 
     /**
      * pay the specified request in storage.
@@ -191,10 +194,26 @@ class PurchaseRequestController extends Controller
                 'status' => 'paid'
             ]);
             $observation = new PurchaseRequestObservation([
-                'message' => 'Cotización pagada',
+                'message' => 'SOLICITUD PAGADA POR ' . Auth::user()->name,
                 'user_id' => $request->user_id
             ]);
             $purchaseRequest->observations()->save($observation);
+
+            //Quote update to paid
+            if ($purchaseRequest->quote_id && !$purchaseRequest->purchase_request_pending_id) {
+                $quote = Quote::find($purchaseRequest->quote_id);
+                if ($quote) {
+                    $quote->status = 'paid';
+                    $quote->save();
+
+                    $observationQuote = new QuoteObservation([
+                        'message' => 'COTIZACION PAGADA POR ' . Auth::user()->name,
+                        'user_id' => $request->user_id
+                    ]);
+                    $quote->observations()->save($observationQuote);
+                }
+            }
+
 
             $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
                 ->where('id', $id)->firstOrFail();

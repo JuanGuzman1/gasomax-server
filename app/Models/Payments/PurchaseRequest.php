@@ -17,12 +17,17 @@ class PurchaseRequest extends Model
         'status',
         'quote_id',
         'petitioner_id',
+        'provider_id',
+        'provider_account_id',
+        'paymentWithoutInvoice',
         'paymentDate',
+        'fromQuote',
         'title',
         'paymentAmount',
         'totalAmount',
         'totalPaymentApproved',
-        'totalPaymentModified'
+        'totalPaymentModified',
+        'purchase_request_pending_id'
     ];
 
     /**

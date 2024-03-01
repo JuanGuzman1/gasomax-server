@@ -18,7 +18,11 @@ return new class extends Migration
             $table->float('paymentAmount');
             $table->unsignedBigInteger('quote_id')->nullable();
             $table->unsignedBigInteger('petitioner_id');
+            $table->unsignedBigInteger('provider_id')->nullable();
+            $table->unsignedBigInteger('provider_account_id')->nullable();
+            $table->boolean('paymentWithoutInvoice')->default(false);
             $table->enum('status', ['pending', 'approved', 'paid', 'rejected'])->default('pending');
+            $table->boolean('fromQuote')->default(false);
             $table->date('paymentDate')->nullable();
             $table->boolean('totalPaymentApproved')->default(false);
             $table->boolean('totalPaymentModified')->default(false);
@@ -28,6 +32,8 @@ return new class extends Migration
 
             $table->foreign('quote_id')->references('id')->on('quotes');
             $table->foreign('petitioner_id')->references('id')->on('users');
+            $table->foreign('provider_id')->references('id')->on('providers');
+            $table->foreign('provider_account_id')->references('id')->on('provider_accounts');
         });
     }
 
