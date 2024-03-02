@@ -31,7 +31,7 @@ class QuoteController extends Controller
         $petitioner = $request->petitioner;
         $status = $request->status;
 
-        return $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images'])
+        return $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images', 'payments'])
             ->when($provider, function ($query) use ($provider) {
                 return $query->whereHas('provider', function ($q) use ($provider) {
                     $q->where('name',  'like', '%' . $provider . '%');
@@ -84,7 +84,7 @@ class QuoteController extends Controller
             if ($request->observation) {
                 $observation = new QuoteObservation([
                     'message' => $request->observation,
-                    'user_id' => $quote->petitioner_id
+                    'user_id' => Auth::user()->id
                 ]);
 
                 $quote->observations()->save($observation);
@@ -103,13 +103,21 @@ class QuoteController extends Controller
             if ($request->status === 'authorized' || $request->status === 'rejected') {
                 $status = $request->status === 'authorized' ? 'AUTORIZADO' : 'RECHAZADO';
                 $observation = new QuoteObservation([
-                    'message' => $status . ' por ' . Auth::user()->name,
+                    'message' => $status . ' POR ' . strtoupper(Auth::user()->name),
                     'user_id' => Auth::user()->id
                 ]);
 
                 $quote->observations()->save($observation);
             }
 
+            //rejected
+            if ($request->status === 'rejected' && $request->selectedQuoteID) {
+                $quoteFile = QuoteFile::find($request->selectedQuoteID);
+                if ($quoteFile) {
+                    $quoteFile->selectedQuoteFile = 0;
+                    $quoteFile->save();
+                }
+            }
 
             $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images'])
                 ->where('id', $id)->firstOrFail();
@@ -145,7 +153,7 @@ class QuoteController extends Controller
 
             if ($request->status === 'sentPay') {
                 $observation = new QuoteObservation([
-                    'message' => 'ENVIADO A PROCESO DE PAGO' . ' por ' . Auth::user()->name,
+                    'message' => 'ENVIADO A PROCESO DE PAGO' . ' POR ' . strtoupper(Auth::user()->name),
                     'user_id' => Auth::user()->id
                 ]);
                 $quote->observations()->save($observation);
@@ -164,7 +172,7 @@ class QuoteController extends Controller
             ]);
             $paymentRequest->save();
 
-            $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images'])
+            $quoteRes = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images', 'payments'])
                 ->where('id', $id)->firstOrFail();
 
             $data = [

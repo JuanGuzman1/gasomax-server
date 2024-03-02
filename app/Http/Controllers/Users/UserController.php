@@ -36,8 +36,10 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
-            $data = $this->user->create($request->all());
-            return $this->successResponse($data);
+            $user = $this->user->create($request->all());
+            $userRes = $this->user->with(['department', 'modules', 'permissions'])
+                ->where('id', $user->id)->firstOrFail();
+            return $this->successResponse($userRes);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
@@ -60,7 +62,9 @@ class UserController extends Controller
         try {
             $user = $this->user->find($id);
             $user->update($request->all());
-            return $this->successResponse($user);
+            $userRes = $this->user->with(['department', 'modules', 'permissions'])
+                ->where('id', $id)->firstOrFail();
+            return $this->successResponse($userRes);
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }

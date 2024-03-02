@@ -91,4 +91,12 @@ class Quote extends Model
     {
         return $this->hasMany(QuoteObservation::class);
     }
+
+    /**
+     * Get the payments of the quote.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(PurchaseRequest::class)->with('files');
+    }
 }

@@ -27,6 +27,8 @@ class User extends Authenticatable
         'nss',
         'payrollNumber',
         'password',
+        'role_id',
+        'department_id'
     ];
 
     /**

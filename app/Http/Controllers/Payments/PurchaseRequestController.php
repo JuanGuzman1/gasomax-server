@@ -80,7 +80,7 @@ class PurchaseRequestController extends Controller
 
             if ($request->totalPaymentApproved) {
                 $observation = new PurchaseRequestObservation([
-                    'message' => 'PAGO APROBADO POR ' . Auth::user()->name,
+                    'message' => 'PAGO APROBADO POR ' . strtoupper(Auth::user()->name),
                     'user_id' => Auth::user()->id
                 ]);
                 $purchaseRequest->status = 'approved';
@@ -91,7 +91,7 @@ class PurchaseRequestController extends Controller
 
             if ($request->totalPaymentModified) {
                 $observation = new PurchaseRequestObservation([
-                    'message' => 'PAGO APROBADO Y MODIFICADO POR ' . Auth::user()->name,
+                    'message' => 'PAGO APROBADO Y MODIFICADO POR ' . strtoupper(Auth::user()->name),
                     'user_id' => Auth::user()->id
                 ]);
                 $purchaseRequest->status = 'approved';
@@ -167,7 +167,7 @@ class PurchaseRequestController extends Controller
             if ($request->observation) {
 
                 $observation = new PurchaseRequestObservation([
-                    'message' => 'Motivo rechazo: ' . $request->observation,
+                    'message' => 'MOTIVO DE RECHAZO: ' . $request->observation,
                     'user_id' => $request->user_id
                 ]);
 
@@ -194,7 +194,7 @@ class PurchaseRequestController extends Controller
                 'status' => 'paid'
             ]);
             $observation = new PurchaseRequestObservation([
-                'message' => 'SOLICITUD PAGADA POR ' . Auth::user()->name,
+                'message' => 'SOLICITUD PAGADA POR ' . strtoupper(Auth::user()->name),
                 'user_id' => $request->user_id
             ]);
             $purchaseRequest->observations()->save($observation);
@@ -207,7 +207,7 @@ class PurchaseRequestController extends Controller
                     $quote->save();
 
                     $observationQuote = new QuoteObservation([
-                        'message' => 'COTIZACION PAGADA POR ' . Auth::user()->name,
+                        'message' => 'COTIZACION PAGADA POR ' . strtoupper(Auth::user()->name),
                         'user_id' => $request->user_id
                     ]);
                     $quote->observations()->save($observationQuote);
