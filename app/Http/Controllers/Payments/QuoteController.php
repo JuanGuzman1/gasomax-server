@@ -7,6 +7,7 @@ use App\Models\Payments\PurchaseRequest;
 use App\Models\Payments\Quote;
 use App\Models\Payments\QuoteFile;
 use App\Models\Payments\QuoteObservation;
+use App\Models\Users\User;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,11 +28,20 @@ class QuoteController extends Controller
      */
     public function index(Request $request)
     {
+        $user = User::find(Auth::user()->id);
         $provider = $request->provider;
         $petitioner = $request->petitioner;
         $status = $request->status;
+        $role = $user->role->name;
+        $department = $user->department->name;
+        $permissions = [];
 
-        return $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images', 'payments'])
+        foreach ($user->permissions as $p) {
+            array_push($permissions, $p->permission);
+        };
+
+
+        $data = $this->quote->with(['provider', 'petitioner', 'quoteConcept', 'files', 'images', 'payments'])
             ->when($provider, function ($query) use ($provider) {
                 return $query->whereHas('provider', function ($q) use ($provider) {
                     $q->where('name',  'like', '%' . $provider . '%');
@@ -43,7 +53,86 @@ class QuoteController extends Controller
             })->when($status, function ($query) use ($status) {
                 return $query->where('status', $status);
             })
-            ->orderBy('created_at', 'desc')->paginate(10);
+            ->orderBy('created_at', 'desc');
+
+
+        if (!array_search('upload.quote', array_column($permissions, 'name'))) {
+            $data->where('petitioner_id', $user->id);
+
+            //GERENTES
+            if ($role === 'GERENTE') {
+                if ($department === 'CONTRALORIA') {
+                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                        $query->whereHas('role', function ($query) {
+                            $query->whereIn('name', array('EJECUTIVO', 'JEFE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('GESTORIA', 'COMPRAS', 'MAXSTORE'));
+                        });
+                    })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
+                }
+
+                if ($department === 'OPERACION') {
+                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                        $query->whereHas('role', function ($query) {
+                            $query->whereIn('name', array('JEFE', 'AUXILIAR', 'COORDINADOR', 'EJECUTIVO'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array(
+                                'OPERACION', 'SISTEMAS',
+                                'NORMATIVIDAD', 'COMPRAS', 'GESTORIA'
+                            ));
+                        });
+                    })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
+                }
+            }
+
+
+            //DIRECCION
+            if ($department === 'DIRECCION') {
+                if ($role === 'DIRECCION GENERAL') {
+
+                    //direct
+                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                        $query->whereHas('role', function ($query) {
+                            $query->whereIn('name', array('JEFE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('RESTAURANTE'));
+                        });
+                    })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
+
+                    //withVoBo
+                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                        $query->whereHas('role', function ($query) {
+                            $query->whereIn('name', array('EJECUTIVO', 'COORDINADOR', 'GERENTE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('COMPRAS', 'GESTORIA', 'SISTEMAS', 'DH', 'CONTRALORIA'));
+                        });
+                    })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress', 'approved'));
+                }
+
+                if ($role === 'SUBDIRECCION GENERAL') {
+                    //direct
+                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                        $query->whereHas('role', function ($query) {
+                            $query->whereIn('name', array('COORDINADOR', 'JEFE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('MKT', 'MTTO', 'CARWASH', 'MAXSTORE'));
+                        });
+                    })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
+
+                    //withVoBo
+                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                        $query->whereHas('role', function ($query) {
+                            $query->whereIn('name', array('JEFE', 'AUXILIAR', 'COORDINADOR', 'GERENTE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('OPERACION', 'MAXSTORE', 'NORMATIVIDAD'));
+                        });
+                    })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress', 'approved'));
+                }
+            }
+        }
+
+
+        return $data->paginate(10);
     }
 
     /**
@@ -107,6 +196,14 @@ class QuoteController extends Controller
                     'user_id' => Auth::user()->id
                 ]);
 
+                $quote->observations()->save($observation);
+            }
+
+            if ($request->status === 'ok') {
+                $observation = new QuoteObservation([
+                    'message' => 'VoBo POR ' . strtoupper(Auth::user()->name),
+                    'user_id' => Auth::user()->id
+                ]);
                 $quote->observations()->save($observation);
             }
 

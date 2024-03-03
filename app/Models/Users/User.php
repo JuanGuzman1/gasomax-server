@@ -60,6 +60,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the role that owns the user.
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
      * Get the modules for the user.
      */
     public function modules(): HasMany
