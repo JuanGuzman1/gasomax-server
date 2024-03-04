@@ -61,25 +61,58 @@ class QuoteController extends Controller
 
             //GERENTES
             if ($role === 'GERENTE') {
+                //CONTRALORIA
                 if ($department === 'CONTRALORIA') {
-                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                    $data->orWhereHas('petitioner', function ($query) {
                         $query->whereHas('role', function ($query) {
-                            $query->whereIn('name', array('EJECUTIVO', 'JEFE'));
+                            $query->whereIn('name', array('EJECUTIVO'));
                         })->whereHas('department', function ($query) {
-                            $query->whereIn('name', array('GESTORIA', 'COMPRAS', 'MAXSTORE'));
+                            $query->whereIn('name', array('GESTORIA', 'COMPRAS'));
+                        });
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('JEFE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('MAXSTORE'));
                         });
                     })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
                 }
-
+                //OPERACIONES DE ESTACIONES
                 if ($department === 'OPERACION') {
-                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                    $data->orWhereHas('petitioner', function ($query) {
                         $query->whereHas('role', function ($query) {
-                            $query->whereIn('name', array('JEFE', 'AUXILIAR', 'COORDINADOR', 'EJECUTIVO'));
+                            $query->whereIn('name', array('EJECUTIVO'));
                         })->whereHas('department', function ($query) {
                             $query->whereIn('name', array(
-                                'OPERACION', 'SISTEMAS',
-                                'NORMATIVIDAD', 'COMPRAS', 'GESTORIA'
+                                'COMPRAS', 'GESTORIA'
                             ));
+                        });
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('JEFE', 'AUXILIAR'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array(
+                                'OPERACION'
+                            ));
+                        });
+
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('COORDINADOR'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array(
+                                'SISTEMAS', 'NORMATIVIDAD'
+                            ));
+                        });
+                    })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
+                }
+            }
+
+            //COORDINADORES
+            if ($role === 'COORDINADOR') {
+                if ($department === 'MTTO') {
+                    $data->orWhereHas('petitioner', function ($query) {
+                        $query->whereHas('role', function ($query) {
+                            $query->whereIn('name', array('JEFE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('MTTO'));
                         });
                     })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
                 }
@@ -88,10 +121,10 @@ class QuoteController extends Controller
 
             //DIRECCION
             if ($department === 'DIRECCION') {
-                if ($role === 'DIRECCION GENERAL') {
 
+                if ($role === 'DIRECCION GENERAL') {
                     //direct
-                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                    $data->orWhereHas('petitioner', function ($query) {
                         $query->whereHas('role', function ($query) {
                             $query->whereIn('name', array('JEFE'));
                         })->whereHas('department', function ($query) {
@@ -100,31 +133,62 @@ class QuoteController extends Controller
                     })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
 
                     //withVoBo
-                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                    $data->orWhereHas('petitioner', function ($query) {
                         $query->whereHas('role', function ($query) {
-                            $query->whereIn('name', array('EJECUTIVO', 'COORDINADOR', 'GERENTE'));
+                            $query->whereIn('name', array('EJECUTIVO'));
                         })->whereHas('department', function ($query) {
-                            $query->whereIn('name', array('COMPRAS', 'GESTORIA', 'SISTEMAS', 'DH', 'CONTRALORIA'));
+                            $query->whereIn('name', array('COMPRAS', 'GESTORIA'));
+                        });
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('COORDINADOR'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('SISTEMAS'));
+                        });
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('GERENTE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('DH', 'CONTRALORIA'));
                         });
                     })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress', 'approved'));
                 }
 
                 if ($role === 'SUBDIRECCION GENERAL') {
                     //direct
-                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                    $data->orWhereHas('petitioner', function ($query) {
                         $query->whereHas('role', function ($query) {
-                            $query->whereIn('name', array('COORDINADOR', 'JEFE'));
+                            $query->whereIn('name', array('COORDINADOR'));
                         })->whereHas('department', function ($query) {
-                            $query->whereIn('name', array('MKT', 'MTTO', 'CARWASH', 'MAXSTORE'));
+                            $query->whereIn('name', array('MKT', 'MTTO', 'MAXSTORE'));
+                        });
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('JEFE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('CARWASH'));
                         });
                     })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress'));
 
+
                     //withVoBo
-                    $data->where('petitioner_id', $user->id)->orWhereHas('petitioner', function ($query) {
+                    $data->orWhereHas('petitioner', function ($query) {
                         $query->whereHas('role', function ($query) {
-                            $query->whereIn('name', array('JEFE', 'AUXILIAR', 'COORDINADOR', 'GERENTE'));
+                            $query->whereIn('name', array('JEFE'));
                         })->whereHas('department', function ($query) {
-                            $query->whereIn('name', array('OPERACION', 'MAXSTORE', 'NORMATIVIDAD'));
+                            $query->whereIn('name', array('OPERACION', 'MAXSTORE', 'MTTO'));
+                        });
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('AUXILIAR'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('OPERACION'));
+                        });
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('COORDINADOR'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('NORMATIVIDAD'));
+                        });
+                        $query->orWhereHas('role', function ($query) {
+                            $query->whereIn('name', array('GERENTE'));
+                        })->whereHas('department', function ($query) {
+                            $query->whereIn('name', array('OPERACION'));
                         });
                     })->where('rejectQuotes', false)->whereNotIn('status', array('sent', 'inprogress', 'approved'));
                 }
