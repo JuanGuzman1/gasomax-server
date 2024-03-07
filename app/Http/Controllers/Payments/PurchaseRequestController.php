@@ -229,18 +229,16 @@ class PurchaseRequestController extends Controller
      */
     public function getPendingPayments(Request $request)
     {
-        $userID = $request->user_id;
+        $userID = Auth::user()->id;
         $petitioner = $request->petitioner;
 
 
         return $this->purchaseRequest->with(['quote', 'petitioner'])
-            ->when($userID, function ($query) use ($userID) {
-                return $query->where('petitioner_id', $userID);
-            })->when($userID, function ($query) use ($userID) {
-                return $query->whereHas('quote', function ($q) use ($userID) {
-                    $q->where('petitioner_id', $userID);
-                });
-            })->when($petitioner, function ($query) use ($petitioner) {
+            ->where('petitioner_id', $userID)
+            ->orWhereHas('quote', function ($q) use ($userID) {
+                $q->orWhere('petitioner_id', $userID);
+            })
+            ->when($petitioner, function ($query) use ($petitioner) {
                 return $query->whereHas('petitioner', function ($q) use ($petitioner) {
                     $q->where('name',  'like', '%' . $petitioner . '%');
                 });
@@ -255,14 +253,14 @@ class PurchaseRequestController extends Controller
     public function getBalancePayments(string $id)
     {
         $pendingPayments = [];
-        $pendingPayment = PurchaseRequest::findOrFail($id);
+        $pendingPayment = PurchaseRequest::with('quote')->findOrFail($id);
         array_unshift($pendingPayments, $pendingPayment);
 
         $last_id = $pendingPayment->purchase_request_pending_id;
 
         while ($last_id) {
             if ($last_id != null) {
-                $pendingPayment = PurchaseRequest::findOrFail($last_id);
+                $pendingPayment = PurchaseRequest::with('quote')->findOrFail($last_id);
 
                 $last_id = $pendingPayment->purchase_request_pending_id;
                 array_unshift($pendingPayments, $pendingPayment);

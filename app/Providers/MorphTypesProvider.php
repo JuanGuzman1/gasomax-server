@@ -24,6 +24,7 @@ class MorphTypesProvider extends ServiceProvider
             'provider' => 'App\Models\Administration\Provider',
             'purchaseRequest' => 'App\Models\Payments\PurchaseRequest',
             'quote' => 'App\Models\Payments\Quote',
+            'user' => 'App\Models\Users\User',
         ]);
     }
 }

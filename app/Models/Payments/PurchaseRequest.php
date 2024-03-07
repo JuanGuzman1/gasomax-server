@@ -35,7 +35,7 @@ class PurchaseRequest extends Model
      */
     public function quote(): BelongsTo
     {
-        return $this->belongsTo(Quote::class);
+        return $this->belongsTo(Quote::class)->with(['provider', 'quoteConcept']);
     }
 
     /**

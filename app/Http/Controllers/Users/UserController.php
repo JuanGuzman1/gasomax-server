@@ -3,7 +3,13 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Models\Module;
+use App\Models\Permission;
+use App\Models\Users\Department;
+use App\Models\Users\Role;
 use App\Models\Users\User;
+use App\Models\Users\UserModule;
+use App\Models\Users\UserPermission;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 
@@ -24,7 +30,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $name = $request->name;
-        //TODO GET PERMISSIONS IN ANOTHER FUNCTION
+
         return $this->user->with(['department', 'modules', 'permissions'])->when($name, function ($query) use ($name) {
             return $query->where('name',  'like', '%' . $name . '%');
         })->orderBy('created_at', 'desc')->paginate(10);
@@ -37,6 +43,182 @@ class UserController extends Controller
     {
         try {
             $user = $this->user->create($request->all());
+
+            if ($request->department_id && $request->role_id) {
+
+                $department = Department::find($request->department_id);
+                $role = Role::find($request->role_id);
+                $modules = Module::all();
+                //GERENTES
+                if ($department->name !== 'DIRECCION' && $role->name === 'GERENTE') {
+                    foreach ($modules as $m) {
+                        if ($m->submodule === 'banks') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array('index'))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'providers') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array('index'))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'quotes') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'show', 'delete', 'reject',
+                                    'approve', 'authorize.minor.1000', 'authorize.minor.5000',
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'purchaseRequest') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'show', 'delete', 'reject',
+                                    'authorize'
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'pendingPayments') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'delete'
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                    }
+                }
+                if ($department->name === 'DIRECCION') {
+                    foreach ($modules as $m) {
+                        if ($m->submodule === 'banks') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array('index'))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'providers') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array('index'))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'quotes') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'show', 'delete', 'reject',
+                                    'approve', 'authorize.mayor.1000', 'authorize.mayor.5000',
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'purchaseRequest') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'show', 'delete', 'reject',
+                                    'authorize'
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'pendingPayments') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'delete'
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                    }
+                }
+                if ($department->name !== 'DIRECCION' && $role->name !== 'GERENTE') {
+                    foreach ($modules as $m) {
+
+                        if ($m->submodule === 'quotes') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'show', 'delete', 'reject',
+                                    'approve',
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'purchaseRequest') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'show', 'delete',
+
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                        if ($m->submodule === 'pendingPayments') {
+                            $userModule = new UserModule(['module_id' => $m->id]);
+                            $user->modules()->save($userModule);
+                            $permissions = Permission::where('module_id', $m->id)
+                                ->whereIn('name', array(
+                                    'create', 'index', 'edit', 'delete'
+                                ))->get();
+                            foreach ($permissions as $p) {
+                                $userPermission = new UserPermission(['permission_id' => $p->id]);
+                                $user->permissions()->save($userPermission);
+                            }
+                        }
+                    }
+                }
+            }
+
             $userRes = $this->user->with(['department', 'modules', 'permissions'])
                 ->where('id', $user->id)->firstOrFail();
             return $this->successResponse($userRes);

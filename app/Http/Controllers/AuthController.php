@@ -55,7 +55,7 @@ class AuthController extends Controller
     public function getUser()
     {
         $user = Auth::user();
-        $userData = User::with(['department', 'modules', 'permissions'])->find($user->id);
+        $userData = User::with(['department', 'role', 'modules', 'permissions', 'files'])->find($user->id);
 
         return $this->successResponse($userData);
     }
