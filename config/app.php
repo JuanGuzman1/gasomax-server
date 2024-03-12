@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'America/Mexico_City',
 
     /*
     |--------------------------------------------------------------------------
@@ -123,7 +123,7 @@ return [
     */
 
     'key' => env('APP_KEY'),
-    
+
     'email' => env('APP_EMAIL'),
     'password' => env('APP_PASSWORD'),
 

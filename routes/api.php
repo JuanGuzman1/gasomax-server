@@ -5,6 +5,7 @@ use App\Http\Controllers\Users\DepartmentController;
 use App\Http\Controllers\Administration\ProviderController;
 use App\Http\Controllers\Administration\UnitController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\Payments\PurchaseRequestController;
@@ -57,6 +58,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/file', FileController::class);
     Route::get('/download/{file}', [FileController::class, 'download']);
     Route::delete('/{model_id}/{model_type}/destroy/files', [FileController::class, 'destroyByModel']);
+    Route::post('/token/dropbox', [FileController::class, 'getTokenWCode']);
 
     //quoteConcepts
     Route::get('/select/charge', [QuoteConceptController::class, 'getCharges']);
@@ -90,6 +92,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('/user', UserController::class);
     Route::get('/auth/user', [AuthController::class, 'getUser']);
 
+
     //modules
     Route::apiResource('/module', ModuleController::class);
     Route::post('/assign/module', [ModuleController::class, 'assign']);
@@ -97,4 +100,7 @@ Route::middleware('auth:api')->group(function () {
     //permissions
     Route::apiResource('/permission', PermissionController::class);
     Route::post('/assign/permission', [PermissionController::class, 'assign']);
+
+    //configuration
+    Route::apiResource('/configuration', ConfigurationController::class);
 });

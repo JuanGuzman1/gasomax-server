@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Configuration;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\File;
-use Error;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Support\Facades\Http;
 use Exception;
 
 class FileController extends Controller
 {
+    use ApiResponseTrait;
 
     protected $file;
     public function __construct()
@@ -113,6 +116,45 @@ class FileController extends Controller
             return response()->download($localFilePath, 'archivo_temporal.pdf')->deleteFileAfterSend(true);
         } catch (Exception $e) {
             return response()->json(['msg' => $e->getMessage()]);
+        }
+    }
+
+
+    public function getTokenWCode(Request $request)
+    {
+        try {
+            $response = Http::asForm()->post('https://api.dropboxapi.com/oauth2/token', [
+                'grant_type' => 'authorization_code',
+                'code' => $request->code,
+                'client_id' => 'g3bm3pdzcbycsb7',
+                'client_secret' =>  'wlhthat651rnf5i',
+                'redirect_uri' => 'http://localhost:3000/dashboard'
+            ]);
+
+            if ($response->successful()) {
+                $resApi = $response->json();
+                $config = Configuration::first();
+                if ($config) {
+                    $config->authorization_code_dropbox = $request->code;
+                    $config->token_dropbox = $resApi['access_token'];
+                    $config->token_dropbox_refresh = $resApi['refresh_token'];
+                    $config->token_dropbox_expires_in = $resApi['expires_in'];
+                } else {
+                    $config = new Configuration();
+                    $config->authorization_code_dropbox = $request->code;
+                    $config->token_dropbox = $resApi['access_token'];
+                    $config->token_dropbox_refresh = $resApi['refresh_token'];
+                    $config->token_dropbox_expires_in = $resApi['expires_in'];
+                }
+
+                $config->save();
+
+                return $this->successResponse($resApi);
+            } else {
+                return $this->errorResponse($response->json());
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage());
         }
     }
 }
