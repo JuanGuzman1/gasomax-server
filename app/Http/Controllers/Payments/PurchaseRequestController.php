@@ -139,19 +139,27 @@ class PurchaseRequestController extends Controller
     }
 
     /**
-     * Display the pending payment details by provider.
+     * Display the pending payment details .
      */
     public function showPendingPaymentDetails(Request $request)
     {
         $userID = $request->user_id;
-        return $this->purchaseRequest->with(['quote'])
-            ->when($userID, function ($query) use ($userID) {
-                return $query->where('petitioner_id', $userID);
-            })->when($userID, function ($query) use ($userID) {
-                return $query->whereHas('quote', function ($q) use ($userID) {
-                    $q->where('petitioner_id', $userID);
-                });
-            })->where('balance', '>', 0)->get();
+        $dataBalance = $this->purchaseRequest->with(['quote'])
+            ->where('petitioner_id', $userID)->where('status', 'paid')->where('balance', '>', 0)
+            ->orWhereHas('quote', function ($q) use ($userID) {
+                $q->orWhere('petitioner_id', $userID);
+            })->where('status', 'paid')->where('balance', '>', 0)->get();
+
+        $data = [];
+
+        foreach ($dataBalance as $db) {
+            $dataAll = $this->purchaseRequest->where('purchase_request_pending_id', $db->id)->first();
+            if (!$dataAll) {
+                array_push($data, $db);
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -215,6 +223,12 @@ class PurchaseRequestController extends Controller
             }
 
 
+            if ($purchaseRequest->purchase_request_pending_id) {
+                $purchaseRequestOriginal = $this->purchaseRequest->find($purchaseRequest->purchase_request_pending_id);
+                $purchaseRequestOriginal->balance = 0;
+                $purchaseRequestOriginal->save();
+            }
+
             $purchaseRequestRes = $this->purchaseRequest->with(['quote', 'petitioner', 'files'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($purchaseRequestRes);
@@ -235,6 +249,8 @@ class PurchaseRequestController extends Controller
 
         return $this->purchaseRequest->with(['quote', 'petitioner'])
             ->where('petitioner_id', $userID)
+            ->where('balance', '>', 0)
+            ->where('status', 'paid')
             ->orWhereHas('quote', function ($q) use ($userID) {
                 $q->orWhere('petitioner_id', $userID);
             })
@@ -244,6 +260,7 @@ class PurchaseRequestController extends Controller
                 });
             })
             ->where('balance', '>', 0)
+            ->where('status', 'paid')
             ->paginate(10);
     }
 
