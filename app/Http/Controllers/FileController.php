@@ -128,7 +128,7 @@ class FileController extends Controller
                 'code' => $request->code,
                 'client_id' => 'g3bm3pdzcbycsb7',
                 'client_secret' =>  'wlhthat651rnf5i',
-                'redirect_uri' => 'http://localhost:3000/dashboard'
+                'redirect_uri' => $request->redirect_uri
             ]);
 
             if ($response->successful()) {
