@@ -30,10 +30,18 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $name = $request->name;
+        $role = $request->role;
 
-        return $this->user->with(['department', 'modules', 'permissions'])->when($name, function ($query) use ($name) {
+        return $this->user->with([
+            'department', 'modules',
+            'permissions', 'role'
+        ])->when($name, function ($query) use ($name) {
             return $query->where('name',  'like', '%' . $name . '%');
-        })->orderBy('created_at', 'desc')->paginate(10);
+        })->when($role, function ($query) use ($role) {
+            $query->whereHas('role', function ($query) use ($role) {
+                return $query->where('name', 'like', '%' . $role . '%');
+            });
+        })->orderBy('created_at', 'asc')->paginate(10);
     }
 
     /**
