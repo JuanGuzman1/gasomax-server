@@ -227,7 +227,7 @@ class UserController extends Controller
                 }
             }
 
-            $userRes = $this->user->with(['department', 'modules', 'permissions'])
+            $userRes = $this->user->with(['department', 'modules', 'permissions', 'role'])
                 ->where('id', $user->id)->firstOrFail();
             return $this->successResponse($userRes);
         } catch (\Exception $e) {
@@ -252,7 +252,7 @@ class UserController extends Controller
         try {
             $user = $this->user->find($id);
             $user->update($request->all());
-            $userRes = $this->user->with(['department', 'modules', 'permissions'])
+            $userRes = $this->user->with(['department', 'modules', 'permissions', 'role'])
                 ->where('id', $id)->firstOrFail();
             return $this->successResponse($userRes);
         } catch (\Exception $e) {
